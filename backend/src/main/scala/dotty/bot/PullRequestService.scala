@@ -86,7 +86,7 @@ trait PullRequestService {
     else if (content.toLowerCase.contains("check cla")) {
       val repo = event.repository
       val lastCommit = commits(repo, event.issue.number).last
-      checkCLA(lastCommit, repo)
+      checkCLA(repo, lastCommit)
       Ok("CLA checked")
     }
     else {
