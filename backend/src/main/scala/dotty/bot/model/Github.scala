@@ -1,6 +1,6 @@
 package dotty.bot.model
 
-import upickle.default.{Reader, macroR, Writer, macroW}
+import upickle.default.{ReadWriter, Reader, Writer, macroR, macroRW, macroW}
 
 /** Models JSON objects from the GitHub v3 REST API.
  *
@@ -84,5 +84,10 @@ object Github {
   case class CommitInfo(message: String)
   object CommitInfo {
     implicit def reader: Reader[CommitInfo] = macroR
+  }
+
+  case class AccessToken(access_token: String)
+  object AccessToken {
+    implicit def reader: ReadWriter[AccessToken] = macroRW
   }
 }
