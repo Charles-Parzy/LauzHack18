@@ -8,6 +8,7 @@ import ProjectList from './ProjectList';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { Project } from 'src/GithubProject';
 import { createStyles, WithStyles, withStyles } from '@material-ui/core';
+import ComponentContainer from 'src/Utils/ComponentContainer';
 
 const styles = () => createStyles({
     spinnerContainer: {
@@ -59,7 +60,7 @@ class Timeline extends React.Component<TimelineProps, {}> {
             );
         }
         return (
-            <div>
+            <ComponentContainer barTitle="Timeline">
                 <div>
                     <h1>Followed Projects</h1>
                     <ProjectList projects={followedProjects} routing={routing} />
@@ -70,7 +71,7 @@ class Timeline extends React.Component<TimelineProps, {}> {
                     <ProjectList projects={recommendedProjects} routing={routing} />
                 </div>
 
-            </div>
+            </ComponentContainer>
         );
     }
 }

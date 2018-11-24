@@ -1,8 +1,6 @@
 import * as React from 'react';
 import './ProjectProfile.css';
 import {Issue, Project} from "../GithubProject";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
 import Card from "@material-ui/core/Card/Card";
@@ -10,6 +8,7 @@ import CardContent from "@material-ui/core/CardContent/CardContent";
 import List from "@material-ui/core/List/List";
 import ListItem from "@material-ui/core/ListItem/ListItem";
 import ListItemText from "@material-ui/core/ListItemText/ListItemText";
+import ComponentContainer from 'src/Utils/ComponentContainer';
 
 interface ProjectProfileState {
     project: Project;
@@ -46,21 +45,12 @@ class ProjectProfile extends React.Component<ProjectProfileProps, ProjectProfile
         let follow: boolean = this.state.project.followed;
 
         return (
-            <div className="App">
-                <div>
-                    <AppBar position="static" color="default">
-                        <Toolbar>
-                            <Typography variant="h6" className="grow">
-                                Repository
-                            </Typography>
-                            <div><Button variant={follow ? "outlined" : "contained"} color="primary"
-                                         onClick={() => this.updateFollow(!project.followed)}>{project.printFollow()}</Button>
-                            </div>
-                        </Toolbar>
-                    </AppBar>
-                </div>
-                <div>
-                </div>
+            <ComponentContainer 
+                barTitle="Repository" 
+                buttonCallback={() => this.updateFollow(!project.followed)}
+                buttonText={project.printFollow()}
+                buttonVariant={follow ? "outlined" : "contained"}
+            >
                 <div className="information">
                     <div className="title">
                         <Typography variant="h2">{project.getTitle()}</Typography>
@@ -81,8 +71,7 @@ class ProjectProfile extends React.Component<ProjectProfileProps, ProjectProfile
                         </div>
                     </CardContent></Card>
                 </div>
-
-            </div>
+            </ComponentContainer>
         );
     }
 
