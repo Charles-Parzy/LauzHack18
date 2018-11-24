@@ -1,11 +1,12 @@
 package dotty.bot
 
-import dotty.bot.model.CLASignature
-import dotty.bot.model.Github.{IssueCommentEvent, PullRequestEvent}
 import requests.RequestAuth
-import upickle.default.read
 
-object Main extends cask.MainRoutes with PullRequestService {
+import Decorators._
+
+import model.LauzHack.User
+
+object Main extends cask.MainRoutes {
 
 
 //  override def port: Int = 3338
@@ -40,30 +41,10 @@ object Main extends cask.MainRoutes with PullRequestService {
     ghSession.get("https://api.github.com/rate_limit").text
   }
 
-  @cask.get("/cla/:userName")
-  def checkCLA(userName: String) = {
-    val response = requests.get(claUrl(userName))
-    val signature = read[CLASignature](response.text)
-    signature.toString + "\n" + response.text
-  }
-
-  @cask.post("/hook")
-  def githubHook(request: cask.Request) = {
-    val githubEvent =
-      request.headers
-        .getOrElse("x-github-event", Nil)
-        .headOption
-
-    githubEvent match {
-      case Some("pull_request") =>
-        checkPullRequest(read[PullRequestEvent](request.readAllBytes()))
-      case Some("issue_comment") =>
-        checkIssueComment(read[IssueCommentEvent](request.readAllBytes()))
-      case Some(event) =>
-        BadRequest(s"Unsupported event: $event")
-      case _ =>
-        BadRequest("Missing X-GitHub-Event Header")
-    }
+  @loggedIn()
+  @cask.get("/test-logged-in")
+  def loggedInTest()(user: User) = {
+    Ok(s"Suce ${user.token}!")
   }
 
   initialize()
