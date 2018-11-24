@@ -10,8 +10,8 @@ object Main extends cask.MainRoutes with PullRequestService {
 
 //  override def port: Int = 3338
 
-  def GITHUB_USER = "dotty-bot"
-  def GITHUB_TKN = "ddc12156902e1f2fecfe0669a7e9da0db1a2619e"
+  def GITHUB_USER = "allanrenucci"
+  def GITHUB_TKN = "6c875951c64484cb9de5a2c0b994471deef54c3c"
 
   override def debugMode: Boolean = true
 
