@@ -1,7 +1,5 @@
 package dotty.bot
 
-
-import dotty.bot.Decorators._
 import dotty.bot.model.Github
 import dotty.bot.model.Github.{AccessToken, Repository}
 import dotty.bot.model.LauzHack.User
@@ -20,8 +18,8 @@ object Main extends cask.MainRoutes {
     def header = Some(s"token $token")
   }
 
-  def ghUserSession(implicit user: User) = requests.Session(
-    auth = new OAuth2(user.token)
+  def ghUserSession(implicit token: String) = requests.Session(
+    auth = new OAuth2(token)
   )
 
   /** Build the GitHub API url */
@@ -45,9 +43,14 @@ object Main extends cask.MainRoutes {
   }
 
   @cask.get("/timeline")
-  def timeline(languages: Seq[String], topics: Seq[String]) = {
-    val top = topics.map(s => "topic:" + s).mkString("+")
-    val l = languages.map(s => "language:" + s).mkString("+")
+  def timeline(token: String): cask.Response = {
+    val dbUser = DB.getUser(token)
+    if (dbUser.isEmpty) {
+      return BadRequest("Invalid user")
+    }
+    val user = dbUser.get
+    val top = user.topics.map(s => "topic:" + s).mkString("+")
+    val l = user.languages.map(s => "language:" + s).mkString("+")
     val response = requests.get(
       ghAPI(s"/search/repositories?q=$l+$top&sort=stars&order=desc"),
       headers = Map ("Accept" -> "application/vnd.github.mercy-preview+json"))
@@ -83,14 +86,31 @@ object Main extends cask.MainRoutes {
 
   @cask.get("/")
   def root() = {
-    implicit val user = User(token = "d8d87e3a68c43741fa2e5730534e952c8ae814f9")
+    implicit val token = "d8d87e3a68c43741fa2e5730534e952c8ae814f9"
     ghUserSession.get(ghAPI("/user")).text
   }
 
-  @loggedIn()
   @cask.get("/test-logged-in")
   def loggedInTest()(user: User) = {
     Ok(s"Suce ${user.token}!")
+  }
+
+  @cask.get("/profile")
+  def profile(token: String): cask.Response = {
+    val dbUser = DB.getUser(token)
+    if (dbUser.isEmpty) {
+      return BadRequest("Invalid user")
+    }
+    val user = dbUser.get
+    val response = ghUserSession(token).get(ghAPI("/user"))
+    val json = read[Github.User](response.text)
+    val profile = Js.Obj(
+      "name" -> Js.Str(json.login),
+      "picture" -> Js.Str(json.avatar_url),
+      "topics" -> user.topics,
+      "languages" -> user.languages
+    )
+    Ok(ujson.write(profile))
   }
 
   private def getIssues(owner: String, repo: String) = {

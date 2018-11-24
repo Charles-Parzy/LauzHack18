@@ -15,7 +15,10 @@ import upickle.default.{ReadWriter, Reader, Writer, macroR, macroRW, macroW}
 object Github {
 
   // https://developer.github.com/v3/users/
-  case class User(login: String)
+  case class User(
+    login: String,
+    avatar_url: String,
+  )
   object User {
     implicit def rw: ReadWriter[User] = macroRW
   }
