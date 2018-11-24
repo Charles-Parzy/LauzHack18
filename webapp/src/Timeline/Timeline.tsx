@@ -33,14 +33,14 @@ class Timeline extends React.Component<TimelineProps, {}> {
     }
 
     private fetchData() {
-        const { timeline } = this.props;
+        const { auth, timeline } = this.props;
         timeline.waiting = true;
-        const request = new Request("http://localhost:8080/timeline?languages=java&topics=compiler&topics=java"); // TODO: fill the path of the request
+        const request = new Request(`http://localhost:8080/timeline?token=${auth.token}`);
         fetch(request).then(res => res.json())
         .then(res => {
             console.log('Success:', JSON.stringify(res));
-            timeline.followedProjects = res.followed_projects.map((p: any) => new Project(p.id, "", p.name, p.description, [], [], false));
-            timeline.recommendedProjects = res.recommended_projects.map((p: any) => new Project(p.id, "", p.name, p.description, [], [], false));
+            timeline.followedProjects = res.followed_projects.map((p: any) => new Project(p.full_name, p.owner, p.name, p.description, [], [], false));
+            timeline.recommendedProjects = res.recommended_projects.map((p: any) => new Project(p.full_name, p.owner, p.name, p.description, [], [], false));
             timeline.waiting = false;
         })
         .catch(err => {
