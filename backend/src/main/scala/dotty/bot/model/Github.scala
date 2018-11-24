@@ -17,7 +17,7 @@ object Github {
   // https://developer.github.com/v3/users/
   case class User(login: String)
   object User {
-    implicit def reader: Reader[User] = macroR
+    implicit def rw: ReadWriter[User] = macroRW
   }
 
   // https://developer.github.com/v3/repos/
@@ -45,9 +45,15 @@ object Github {
     implicit def reader: Reader[PullRequestEvent] = macroR
   }
 
-  case class Issue(number: Int)
+  case class Issue(
+    number: Int,
+    title: String,
+    html_url: String,
+    created_at: String,
+    user: User
+  )
   object Issue {
-    implicit def reader: Reader[Issue] = macroR
+    implicit def rw: ReadWriter[Issue] = macroRW
   }
 
   // https://developer.github.com/v3/issues/comments/
@@ -88,6 +94,6 @@ object Github {
 
   case class AccessToken(access_token: String)
   object AccessToken {
-    implicit def reader: ReadWriter[AccessToken] = macroRW
+    implicit def rw: ReadWriter[AccessToken] = macroRW
   }
 }

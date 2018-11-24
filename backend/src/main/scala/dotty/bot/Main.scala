@@ -1,14 +1,12 @@
 package dotty.bot
 
-import dotty.bot.model.Github.{AccessToken, IssueCommentEvent, PullRequestEvent}
+import dotty.bot.Decorators._
+import dotty.bot.model.Github
+import dotty.bot.model.Github.AccessToken
+import dotty.bot.model.LauzHack.User
 import requests.RequestAuth
-import upickle.default.read
-import upickle.default.write
-import requests.{RequestAuth, Session}
-
-import Decorators._
-
-import model.LauzHack.User
+import ujson.Js
+import upickle.default.{read, write}
 
 object Main extends cask.MainRoutes {
 
@@ -26,15 +24,16 @@ object Main extends cask.MainRoutes {
     auth = new RequestAuth.Basic(GITHUB_USER, GITHUB_TKN)
   )
 
-
   class OAuth2(token: String) extends RequestAuth {
     def header = Some(s"token $token")
   }
 
-
   def ghUserSession(implicit user: User) = requests.Session(
     auth = new OAuth2(user.token)
   )
+
+  /** Build the GitHub API url */
+  private def ghAPI(path: String) = "https://api.github.com" + path
 
   @cask.get("/generateToken")
   def loggedIn(code: String) = {
@@ -46,27 +45,51 @@ object Main extends cask.MainRoutes {
     write[AccessToken](signature)
   }
 
-
   @cask.get("/")
   def root() = {
     implicit val user = User(token = "d8d87e3a68c43741fa2e5730534e952c8ae814f9")
-    ghUserSession.get("https://api.github.com/user").text
+    ghUserSession.get(ghAPI("/user")).text
   }
 
   @cask.get("/user")
   def user() = {
-    ghSession.get("https://api.github.com/user").text
+    ghSession.get(ghAPI("/user")).text
   }
 
   @cask.get("/rate")
   def rate() = {
-    ghSession.get("https://api.github.com/rate_limit").text
+    ghSession.get(ghAPI("/rate_limit")).text
   }
 
   @loggedIn()
   @cask.get("/test-logged-in")
   def loggedInTest()(user: User) = {
     Ok(s"Suce ${user.token}!")
+  }
+
+  @cask.get("/issues/:owner/:repo")
+  def issues(owner: String, repo: String) = {
+    val response = requests.get(
+      ghAPI(s"/repos/$owner/$repo/issues"),
+      params = Map(
+        "labels" -> "help wanted"
+      )
+    )
+    if (response.is2xx) {
+      val issues = read[List[Github.Issue]](response.text)
+      val cleaned = issues.map { i =>
+        Js.Obj(
+          "number"  -> Js.Num(i.number),
+          "title"   -> Js.Str(i.title),
+          "url"     -> Js.Str(i.html_url),
+          "created" -> Js.Str(i.created_at),
+          "user"    -> Js.Str(i.user.login)
+        )
+      }
+      Ok(ujson.write(cleaned))
+    }
+    else
+      BadRequest(response.statusMessage)
   }
 
   initialize()
