@@ -97,11 +97,6 @@ object Github {
     implicit def rw: ReadWriter[AccessToken] = macroRW
   }
 
-  case class PublicRepositories(items: Seq[PublicRepository])
-  object PublicRepositories {
-    implicit def reader: ReadWriter[PublicRepositories] = macroRW
-  }
-
   case class PublicRepository(
     id: Int,
     name: String,
