@@ -1,6 +1,9 @@
 package dotty.bot
 
+import dotty.bot.model.Github.{AccessToken, IssueCommentEvent, PullRequestEvent}
 import requests.RequestAuth
+import upickle.default.read
+import upickle.default.write
 
 import Decorators._
 
@@ -8,9 +11,7 @@ import model.LauzHack.User
 
 object Main extends cask.MainRoutes {
 
-
 //  override def port: Int = 3338
-
   def GITHUB_USER = "allanrenucci"
   def GITHUB_TKN = "6c875951c64484cb9de5a2c0b994471deef54c3c"
 
@@ -26,9 +27,14 @@ object Main extends cask.MainRoutes {
 
   private def claUrl(userName: String) = s"https://www.lightbend.com/contribute/cla/scala/check/$userName"
 
-  @cask.get("/")
-  def root() = {
-    "Hello Allan"
+  @cask.get("/generateToken")
+  def loggedIn(code: String) = {
+    val response = requests.post(
+      s"https://github.com/login/oauth/access_token?client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&code=$code&accept=json",
+      headers = Map("Accept" -> "application/json")
+    )
+    val signature = read[AccessToken](response.text)
+    write[AccessToken](signature)
   }
 
   @cask.get("/user")
