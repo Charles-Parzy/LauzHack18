@@ -1,4 +1,5 @@
 export class Project {
+    private _id: string;
     private _user: string;
     private _name: string;
     private _description: string;
@@ -6,7 +7,8 @@ export class Project {
     private _issues: Issue[];
     private _followed: boolean;
 
-    constructor(user: string, name: string, description: string, tags: string[], issues: Issue[], followed:boolean) {
+    constructor(id: string, user: string, name: string, description: string, tags: string[], issues: Issue[], followed:boolean) {
+        this._id = id;
         this._user = user;
         this._name = name;
         this._description = description;
@@ -15,6 +17,9 @@ export class Project {
         this._followed = followed;
     }
 
+    get id(): string {
+        return this._id;
+    }
 
     get user(): string {
         return this._user;

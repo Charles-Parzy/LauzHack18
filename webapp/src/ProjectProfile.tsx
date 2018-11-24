@@ -6,7 +6,7 @@ class ProjectProfile extends React.Component {
 
 
     public render() {
-        let project: Project = new Project("lampepfl", "dotty", "Research compiler that will become Scala 3 ", ["scala", "scala3","epfl", "language-server-protocol", "compiler"], [new Issue("2543", "Require `case` prefix for patterns in for-comprehension generators")], false);
+        let project: Project = new Project("dottyProjectId", "lampepfl", "dotty", "Research compiler that will become Scala 3 ", ["scala", "scala3","epfl", "language-server-protocol", "compiler"], [new Issue("2543", "Require `case` prefix for patterns in for-comprehension generators")], false);
 
 
         return (
