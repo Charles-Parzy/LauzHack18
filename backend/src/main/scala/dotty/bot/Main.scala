@@ -4,6 +4,7 @@ import dotty.bot.model.Github.{AccessToken, IssueCommentEvent, PullRequestEvent}
 import requests.RequestAuth
 import upickle.default.read
 import upickle.default.write
+import requests.{RequestAuth, Session}
 
 import Decorators._
 
@@ -25,16 +26,31 @@ object Main extends cask.MainRoutes {
     auth = new RequestAuth.Basic(GITHUB_USER, GITHUB_TKN)
   )
 
-  private def claUrl(userName: String) = s"https://www.lightbend.com/contribute/cla/scala/check/$userName"
+
+  class OAuth2(token: String) extends RequestAuth {
+    def header = Some(s"token $token")
+  }
+
+
+  def ghUserSession(implicit user: User) = requests.Session(
+    auth = new OAuth2(user.token)
+  )
 
   @cask.get("/generateToken")
   def loggedIn(code: String) = {
     val response = requests.post(
-      s"https://github.com/login/oauth/access_token?client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&code=$code&accept=json",
+      s"https://github.com/login/oauth/access_token?client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&code=$code",
       headers = Map("Accept" -> "application/json")
     )
     val signature = read[AccessToken](response.text)
     write[AccessToken](signature)
+  }
+
+
+  @cask.get("/")
+  def root() = {
+    implicit val user = User(token = "d8d87e3a68c43741fa2e5730534e952c8ae814f9")
+    ghUserSession.get("https://api.github.com/user").text
   }
 
   @cask.get("/user")
