@@ -45,17 +45,25 @@ object Main extends cask.MainRoutes {
   @cask.get("/timeline")
   def timeline(token: String): cask.Response = {
     val user = DB.getUser(token)
-    val top = user.topics.map(s => "topic:" + s).mkString("+")
-    val l = user.languages.map(s => "language:" + s).mkString("+")
-    val response = requests.get(
-      ghAPI(s"/search/repositories?q=$l+$top&sort=stars&order=desc"),
-      headers = Map ("Accept" -> "application/vnd.github.mercy-preview+json"))
-    if (response.is2xx) {
-      val repos = read[List[Repository]](response.text)
-      Ok(timelineToJson(repos))
-    } else {
-      BadRequest(response.statusMessage)
+    val topics = user.topics.map(s => "topic:" + s).mkString("+")
+    val languages = user.languages.map(s => "language:" + s).mkString("+")
+    var repos: List[Github.Repository] = List.empty
+    if (!topics.isEmpty && !languages.isEmpty) {
+      var query = topics
+      if (!query.isEmpty) {
+        query += "+" + languages
+      } else {
+        query = languages
+      }
+      val response = requests.get(
+        ghAPI(s"/search/repositories?q=$query&sort=stars&order=desc"),
+        headers = Map ("Accept" -> "application/vnd.github.mercy-preview+json"))
+      if (!response.is2xx) {
+        BadRequest(response.statusMessage)
+      }
+      repos = read[List[Repository]](response.text)
     }
+    Ok(timelineToJson(repos))
   }
 
   @cask.get("/project")
