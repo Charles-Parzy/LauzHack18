@@ -178,22 +178,15 @@ object Main extends cask.MainRoutes {
     Ok(DB.dump())
   }
 
-  @cask.post("/topics")
-  def topics(request: cask.Request): Unit = {
-    val data = new String(request.readAllBytes())
-    val updatedUser = read[UserUpdate](data)
-    val user = DB.getUser(updatedUser.token)
-    user.topics.clear()
-    user.topics ++= updatedUser.topics
-  }
-
-  @cask.post("/languages")
-  def languages(request: cask.Request): Unit = {
+  @cask.post("/tags")
+  def tags(request: cask.Request): Unit = {
     val data = new String(request.readAllBytes())
     val updatedUser = read[UserUpdate](data)
     val user = DB.getUser(updatedUser.token)
     user.languages.clear()
     user.languages ++= updatedUser.languages
+    user.topics.clear()
+    user.topics ++= updatedUser.topics
   }
 
   private def timelineToJson(repos: List[Repository]): String = {
