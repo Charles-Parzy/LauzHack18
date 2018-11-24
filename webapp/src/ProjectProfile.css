@@ -1,0 +1,41 @@
+.title {
+    text-align: center;
+    margin-top: 16px;
+}
+
+.information {
+    margin-top: 16px;
+    margin-left: 120px;
+    margin-right: 120px;
+}
+
+.details {
+    margin-left: 120px;
+    margin-top: 24px;
+}
+
+.card {
+    margin-top: 16px;
+    margin-left: 240px;
+    margin-right: 240px;
+}
+
+.description {
+    margin-top: 16px;
+}
+
+.tags {
+    margin-top: 8px;
+}
+
+.tag-chip {
+    margin-right: 12px;
+}
+
+.issues {
+
+}
+
+.grow {
+    flex-grow: 1;
+}
