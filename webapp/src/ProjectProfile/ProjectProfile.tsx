@@ -96,7 +96,7 @@ class ProjectProfile extends React.Component<ProjectProfileProps, ProjectProfile
             <div className="tags">
                 {
                    project.tags.map(function (tag: string) {
-                       return <span className="tag-chip"><Button size="small" variant="outlined"href={"http://github.com/topics/"+tag}>{tag}</Button></span>
+                       return <span key={tag} className="tag-chip"><Button size="small" variant="outlined"href={"http://github.com/topics/"+tag}>{tag}</Button></span>
                    })
                 }
                 </div>
@@ -106,8 +106,8 @@ class ProjectProfile extends React.Component<ProjectProfileProps, ProjectProfile
     createIssueList(project: Project) {
         return (
             <List>
-                {project.issues.map(function (issue: Issue) {
-                    return <ListItem  button component="a" href={issue.url(project.user, project.name)}><ListItemText primary={issue.title} secondary={issue.subtext} /></ListItem>;
+                {project.issues.map(function (issue: Issue, index: number) {
+                    return <ListItem key={index} button component="a" href={issue.url(project.user, project.name)}><ListItemText primary={issue.title} secondary={issue.subtext} /></ListItem>;
                 })}
             </List>
         )

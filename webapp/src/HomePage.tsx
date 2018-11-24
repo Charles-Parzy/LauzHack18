@@ -7,11 +7,12 @@ import AuthenticationStore from './Authentication/AuthenticationStore';
 
 const styles = (theme: Theme) => createStyles({
     button: {
-        margin: theme.spacing.unit,
+        margin: 0,
     },
     container: {
-        maxWidth: 300,
-        margin: "auto",
+        position: "fixed", /* or absolute */
+        top: "50%",
+        left: "50%",
     },
     input: {
         display: 'none',
@@ -55,15 +56,16 @@ class HomePage extends React.Component<HomePageProps, {}> {
     public render() {
         const { classes } = this.props;
         return (
-            <div className={classes.container}>
+            // <div className={classes.container}>
                 <Button 
                     variant="outlined" 
-                    className={classes.button}
+                    className={classes.container}
                     href="https://github.com/login/oauth/authorize?&client_id=1eb8e00f3ac5bcfa3b42"
+                    color="primary"
                 >
                     Log In with GitHub
                 </Button>
-            </div>
+            // </div>
         );
     }
 }
