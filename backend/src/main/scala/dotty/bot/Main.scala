@@ -173,6 +173,11 @@ object Main extends cask.MainRoutes {
     Ok(write[List[LauzHack.Repository]](toSend))
   }
 
+  @cask.get("/debug")
+  def debug() = {
+    Ok(DB.dump())
+  }
+
   private def timelineToJson(repos: List[Repository]): String = {
     val recommendedRepo = repos.map(i => {
         Js.Obj(

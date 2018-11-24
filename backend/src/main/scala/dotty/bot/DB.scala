@@ -25,4 +25,15 @@ object DB {
   /** Full name to repository */
   val repositories = new mutable.HashMap[String, Repository]()
 
+  def dump(): String = {
+    val sb = new mutable.StringBuilder()
+    sb ++= "Users: "
+    sb ++= users.toString
+    sb += '\n'
+
+    sb ++= "Cached repos: "
+    sb ++= repositories.toString
+    sb.toString
+  }
+
 }
