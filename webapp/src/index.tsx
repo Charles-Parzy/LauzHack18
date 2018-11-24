@@ -1,11 +1,9 @@
+/* tslint:disable */
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import App from './App';
-import './index.css';
-import registerServiceWorker from './registerServiceWorker';
+import Routing from './Routing/Routing';
 
 ReactDOM.render(
-  <App />,
-  document.getElementById('root') as HTMLElement
+  <Routing />,
+  document.getElementById('root')
 );
-registerServiceWorker();
