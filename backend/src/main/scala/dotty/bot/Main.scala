@@ -1,7 +1,7 @@
 package dotty.bot
 
 import dotty.bot.model.{Github, LauzHack}
-import dotty.bot.model.Github.{AccessToken, Repository}
+import dotty.bot.model.Github.{AccessToken, Repository, UserUpdate}
 import dotty.bot.model.LauzHack.User
 import requests.RequestAuth
 import ujson.Js
@@ -178,6 +178,24 @@ object Main extends cask.MainRoutes {
     Ok(DB.dump())
   }
 
+  @cask.post("/topics")
+  def topics(request: cask.Request): Unit = {
+    val data = new String(request.readAllBytes())
+    val updatedUser = read[UserUpdate](data)
+    val user = DB.getUser(updatedUser.token)
+    user.topics.clear()
+    user.topics ++= updatedUser.topics
+  }
+
+  @cask.post("/languages")
+  def languages(request: cask.Request): Unit = {
+    val data = new String(request.readAllBytes())
+    val updatedUser = read[UserUpdate](data)
+    val user = DB.getUser(updatedUser.token)
+    user.languages.clear()
+    user.languages ++= updatedUser.languages
+  }
+
   private def timelineToJson(repos: List[Repository]): String = {
     val recommendedRepo = repos.map(i => {
         Js.Obj(
@@ -196,5 +214,5 @@ object Main extends cask.MainRoutes {
 
   initialize()
 
-  DB.addUser("d8d87e3a68c43741fa2e5730534e952c8ae814f9") // adding Mickael
+  DB.addUser("d8d87e3a68c43741fa2e5730534e952c8ae814f9") // adding Mikael
 }

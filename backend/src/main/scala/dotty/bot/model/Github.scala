@@ -106,4 +106,13 @@ object Github {
   object AccessToken {
     implicit def rw: ReadWriter[AccessToken] = macroRW
   }
+
+  case class UserUpdate(
+    token: String,
+    topics: Seq[String] = Seq.empty,
+    languages: Seq[String] = Seq.empty
+  )
+  object UserUpdate {
+    implicit def reader: Reader[UserUpdate] = macroR
+  }
 }
