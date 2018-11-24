@@ -82,12 +82,14 @@ class ProjectProfile extends React.Component<ProjectProfileProps, ProjectProfile
 
                 </div>
                 <div className="card">
-                    <Card><CardContent>
-                        <div className="issues">
-                            <Typography component="p" variant="h6">Issues:</Typography>
-                            {this.createIssueList(project)}
-                        </div>
-                    </CardContent></Card>
+                    <Card>
+                        <CardContent>
+                            <div className="issues">
+                                <Typography component="p" variant="h6">Issues:</Typography>
+                                {this.createIssueList(project)}
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
             </ComponentContainer>
         );
