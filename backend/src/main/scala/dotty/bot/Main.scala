@@ -13,6 +13,10 @@ object Main extends cask.MainRoutes with PullRequestService {
   def GITHUB_USER = "allanrenucci"
   def GITHUB_TKN = "6c875951c64484cb9de5a2c0b994471deef54c3c"
 
+  // LauzHack Github app
+  def CLIENT_ID = "1eb8e00f3ac5bcfa3b42"
+  def CLIENT_SECRET = "7243931f96aec1e7ba7c4638e65365bba78f3f44"
+
   override def debugMode: Boolean = true
 
   val ghSession = requests.Session(
