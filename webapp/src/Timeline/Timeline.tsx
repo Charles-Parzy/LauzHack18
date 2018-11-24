@@ -12,7 +12,7 @@ interface TimelineProps {
     timeline: TimelineStore;
 }
 
-@observer @inject("auth", "routing", "timeline")
+@inject("auth", "routing", "timeline") @observer
 class Timeline extends React.Component<TimelineProps, {}> {
 
     componentWillMount() {

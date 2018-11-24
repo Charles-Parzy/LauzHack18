@@ -3,11 +3,12 @@ import * as React from "react";
 import createBrowserHistory from 'history/createBrowserHistory';
 import { Provider } from 'mobx-react';
 import { RouterStore, syncHistoryWithStore } from 'mobx-react-router';
-import { Router, Route } from 'react-router';
+import { Router, Route, Switch } from 'react-router';
 import AuthenticationStore from 'src/Authentication/AuthenticationStore';
 import HomePage from "../HomePage";
 import ProjectProfile from 'src/ProjectProfile/ProjectProfile';
 import TimelineStore from 'src/Timeline/TimelineStore';
+import Timeline from 'src/Timeline/Timeline';
 
 const browserHistory = createBrowserHistory();
 const routingStore = new RouterStore();
@@ -30,8 +31,11 @@ export default class Routing extends React.Component<{}, {}> {
         return (
             <Provider {...stores}>
                 <Router history={history}>
-                <Route path="/" component={HomePage} />
-                <Route path="/project" component={ProjectProfile} />
+                    <Switch>
+                        <Route exact={true} path="/" component={HomePage} />
+                        <Route path="/timeline" component={Timeline} />
+                        <Route path="/project" component={ProjectProfile} />
+                    </Switch>
                 </Router>
             </Provider>
         );

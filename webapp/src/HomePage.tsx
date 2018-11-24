@@ -19,7 +19,7 @@ interface HomePageProps extends WithStyles<typeof styles> {
     auth: AuthenticationStore;
 }
 
-@observer @inject("routing", "auth")
+@inject("routing", "auth") @observer
 class HomePage extends React.Component<HomePageProps, {}> {
 
     public componentWillMount() {
@@ -37,11 +37,13 @@ class HomePage extends React.Component<HomePageProps, {}> {
     }
 
     private generateToken(code: string): void {
-        const { auth } = this.props;
-        fetch(`http://localhost:8080/generateToken?code=${code}`).then(res => res.json())
+        const { auth, routing } = this.props;
+        const request = new Request(`http://localhost:8080/generateToken?code=${code}`);
+        fetch(request).then(res => res.json())
         .then(res => {
             console.log('Success:', JSON.stringify(res));
             auth.token = res.access_token;
+            routing.push("/timeline");
         })
         .catch(err => console.error("Error:", err));
     }

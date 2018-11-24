@@ -1,5 +1,4 @@
 import * as React from 'react';
-import './App.css';
 import {Issue, Project} from "../GithubProject";
 import { observer } from 'mobx-react';
 import { observable, computed } from 'mobx';
@@ -10,7 +9,7 @@ interface ProjectProfileProps {
 
 @observer
 class ProjectProfile extends React.Component<ProjectProfileProps, {}> {
-    
+
     @observable private _project: Project = new Project("dottyProjectId", "lampepfl", "dotty", "Research compiler that will become Scala 3 ", ["scala", "scala3","epfl", "language-server-protocol", "compiler"], [new Issue("2543", "Require `case` prefix for patterns in for-comprehension generators")], false);
     @computed get project(): Project { return this._project; }
     set project(project: Project) { this._project = project; }
