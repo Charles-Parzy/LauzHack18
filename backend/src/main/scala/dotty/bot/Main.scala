@@ -55,7 +55,7 @@ object Main extends cask.MainRoutes {
       } else {
         query = languages
       }
-      val response = requests.get(
+      val response = ghUserSession(token).get(
         ghAPI(s"/search/repositories?q=$query&sort=stars&order=desc"),
         headers = Map ("Accept" -> "application/vnd.github.mercy-preview+json"))
       if (!response.is2xx) {
@@ -68,8 +68,8 @@ object Main extends cask.MainRoutes {
 
   @cask.get("/project")
   def project(token: String, owner: String, repo: String) = {
-    val response = requests.get(ghAPI(s"/repos/$owner/$repo"))
-    val issues = getIssues(owner, repo)
+    val response = ghUserSession(token).get(ghAPI(s"/repos/$owner/$repo"))
+    val issues = getIssues(token, owner, repo)
     val user = DB.getUser(token)
     if (response.is2xx) {
       val repo = read[Github.Repository](response.text)
@@ -114,8 +114,8 @@ object Main extends cask.MainRoutes {
     Ok(ujson.write(profile))
   }
 
-  private def getIssues(owner: String, repo: String) = {
-    val response = requests.get(
+  private def getIssues(token: String, owner: String, repo: String) = {
+    val response = ghUserSession(token).get(
       ghAPI(s"/repos/$owner/$repo/issues"),
       params = Map(
         "labels" -> "help wanted"
@@ -145,7 +145,7 @@ object Main extends cask.MainRoutes {
     val fullName = owner + repo
 
     // Adding repo to cache
-    val ghRepo = read[Repository](requests.get(ghAPI(s"/repos/$owner/$repo")).text)
+    val ghRepo = read[Repository](ghUserSession(token).get(ghAPI(s"/repos/$owner/$repo")).text)
     val lhRepo = LauzHack.Repository(
       name = repo,
       owner = owner,
