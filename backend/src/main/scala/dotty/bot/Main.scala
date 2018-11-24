@@ -1,6 +1,6 @@
 package dotty.bot
 
-import dotty.bot.model.Github
+import dotty.bot.model.{Github, LauzHack}
 import dotty.bot.model.Github.{AccessToken, Repository}
 import dotty.bot.model.LauzHack.User
 import requests.RequestAuth
@@ -44,11 +44,7 @@ object Main extends cask.MainRoutes {
 
   @cask.get("/timeline")
   def timeline(token: String): cask.Response = {
-    val dbUser = DB.getUser(token)
-    if (dbUser.isEmpty) {
-      return BadRequest("Invalid user")
-    }
-    val user = dbUser.get
+    val user = DB.getUser(token)
     val top = user.topics.map(s => "topic:" + s).mkString("+")
     val l = user.languages.map(s => "language:" + s).mkString("+")
     val response = requests.get(
@@ -91,17 +87,13 @@ object Main extends cask.MainRoutes {
   }
 
   @cask.get("/test-logged-in")
-  def loggedInTest()(user: User) = {
-    Ok(s"Suce ${user.token}!")
+  def loggedInTest(param: String)(user: User) = {
+    Ok(s"Suce ${user.token} $param!")
   }
 
   @cask.get("/profile")
   def profile(token: String): cask.Response = {
-    val dbUser = DB.getUser(token)
-    if (dbUser.isEmpty) {
-      return BadRequest("Invalid user")
-    }
-    val user = dbUser.get
+    val user = DB.getUser(token)
     val response = ghUserSession(token).get(ghAPI("/user"))
     val json = read[Github.User](response.text)
     val profile = Js.Obj(
@@ -136,7 +128,40 @@ object Main extends cask.MainRoutes {
     }
     else
       List.empty
+  }
 
+  @cask.get("/follow")
+  def follow(token: String, owner: String, repo: String) = {
+    val user = DB.getUser(token)
+    val fullName = owner + repo
+
+    // Adding repo to cache
+    val ghRepo = read[Repository](requests.get(ghAPI(s"/repos/$owner/$repo")).text)
+    val lhRepo = LauzHack.Repository(
+      name = repo,
+      owner = owner,
+      full_name = fullName,
+      description = ghRepo.description,
+      html_url = ghRepo.html_url,
+      topics = ghRepo.topics
+    )
+    val repos = DB.repositories
+    repos += (fullName -> lhRepo)
+
+    // Adding repo to followed repo
+    user.followedRepos += fullName
+
+    val toSend = user.followedRepos.toList.map(repos(_))
+    Ok(write[List[LauzHack.Repository]](toSend))
+  }
+
+  @cask.get("/unfollow")
+  def unfollow(token: String, owner: String, repo: String) = {
+    val user = DB.getUser(token)
+    val fullName = owner + repo
+    user.followedRepos -= fullName
+    val toSend = user.followedRepos.toList.map(DB.repositories(_))
+    Ok(write[List[LauzHack.Repository]](toSend))
   }
 
   private def timelineToJson(repos: List[Repository]): String = {
@@ -156,4 +181,6 @@ object Main extends cask.MainRoutes {
   }
 
   initialize()
+
+  DB.addUser("d8d87e3a68c43741fa2e5730534e952c8ae814f9") // adding Mickael
 }
