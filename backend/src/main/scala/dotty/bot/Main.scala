@@ -70,6 +70,7 @@ object Main extends cask.MainRoutes {
   def project(token: String, owner: String, repo: String) = {
     val response = requests.get(ghAPI(s"/repos/$owner/$repo"))
     val issues = getIssues(owner, repo)
+    val user = DB.getUser(token)
     if (response.is2xx) {
       val repo = read[Github.Repository](response.text)
       val cleaned = Js.Obj(
@@ -77,7 +78,7 @@ object Main extends cask.MainRoutes {
         "name" -> Js.Str(repo.name),
         "url" -> Js.Str(repo.html_url),
         "description" -> Js.Str(repo.description),
-        "followed" ->  Js.Bool(false),
+        "followed" ->  Js.Bool(user.followedRepos.contains(repo.full_name)),
         "owner" -> Js.Str(repo.owner.login),
         "topics" -> repo.topics,
         "issues" -> issues
