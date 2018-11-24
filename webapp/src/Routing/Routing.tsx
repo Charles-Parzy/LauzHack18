@@ -6,7 +6,7 @@ import { RouterStore, syncHistoryWithStore } from 'mobx-react-router';
 import { Router, Route } from 'react-router';
 import AuthenticationStore from 'src/Authentication/AuthenticationStore';
 import HomePage from "../HomePage";
-import ProjectProfile from 'src/ProjectProfile';
+import ProjectProfile from 'src/ProjectProfile/ProjectProfile';
 import TimelineStore from 'src/Timeline/TimelineStore';
 
 const browserHistory = createBrowserHistory();
