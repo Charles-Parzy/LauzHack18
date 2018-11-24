@@ -1,8 +1,8 @@
 /* tslint:disable */
 import * as React from "react";
-import { Button, createStyles, Theme, withStyles, WithStyles } from '@material-ui/core';
-import { RouterStore } from 'mobx-react-router';
-import { observer, inject } from 'mobx-react';
+import {Button, createStyles, Theme, withStyles, WithStyles} from '@material-ui/core';
+import {RouterStore} from 'mobx-react-router';
+import {observer, inject} from 'mobx-react';
 import AuthenticationStore from './Authentication/AuthenticationStore';
 
 const styles = (theme: Theme) => createStyles({
@@ -10,8 +10,9 @@ const styles = (theme: Theme) => createStyles({
         margin: 0,
     },
     container: {
-        position: "fixed", /* or absolute */
+        position: "absolute",
         top: "50%",
+        transform: "translate(-50%, -50%)",
         left: "50%",
     },
     input: {
@@ -28,9 +29,9 @@ interface HomePageProps extends WithStyles<typeof styles> {
 class HomePage extends React.Component<HomePageProps, {}> {
 
     public componentWillMount() {
-        const { auth, routing } = this.props;
-        const { location } = routing;
-        const params = new URLSearchParams(location.search); 
+        const {auth, routing} = this.props;
+        const {location} = routing;
+        const params = new URLSearchParams(location.search);
         const code = params.get('code');
         if (!!code) {
             // clear the stored token
@@ -42,30 +43,30 @@ class HomePage extends React.Component<HomePageProps, {}> {
     }
 
     private generateToken(code: string): void {
-        const { auth, routing } = this.props;
+        const {auth, routing} = this.props;
         const request = new Request(`http://localhost:8080/generateToken?code=${code}`);
         fetch(request).then(res => res.json())
-        .then(res => {
-            console.log('Success:', JSON.stringify(res));
-            auth.token = res.access_token;
-            routing.push("/timeline");
-        })
-        .catch(err => console.error("Error:", err));
+            .then(res => {
+                console.log('Success:', JSON.stringify(res));
+                auth.token = res.access_token;
+                routing.push("/timeline");
+            })
+            .catch(err => console.error("Error:", err));
     }
 
     public render() {
-        const { classes } = this.props;
+        const {classes} = this.props;
         return (
-            // <div className={classes.container}>
-                <Button 
-                    variant="outlined" 
-                    className={classes.container}
+            <div className={classes.container}>
+                <Button
+                    variant="outlined"
                     href="https://github.com/login/oauth/authorize?&client_id=1eb8e00f3ac5bcfa3b42"
                     color="primary"
+                    size="large"
                 >
                     Log In with GitHub
                 </Button>
-            // </div>
+            </div>
         );
     }
 }
