@@ -17,7 +17,7 @@ class ProjectList extends React.Component<ProjectListProps, {}> {
             <List>
                 {
                     displayProjects && projects.map((project) => (
-                        <ListItem key={project.id} button={true} onClick={(e) => routing.push(`/project?${project.id}`)}>
+                        <ListItem key={project.id} button={true} onClick={(e) => routing.push(`/project?owner=${project.user}&repo=${project.name}`)}>
                             <ListItemText primary={project.name} secondary={project.description} />
                         </ListItem>
                     ))
