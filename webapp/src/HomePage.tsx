@@ -1,6 +1,6 @@
 /* tslint:disable */
 import * as React from "react";
-import { Button, createStyles, Icon, Theme, withStyles, WithStyles } from '@material-ui/core';
+import { Button, createStyles, Theme, withStyles, WithStyles } from '@material-ui/core';
 import { RouterStore } from 'mobx-react-router';
 import { observer, inject } from 'mobx-react';
 import AuthenticationStore from './Authentication/AuthenticationStore';
@@ -8,10 +8,14 @@ import AuthenticationStore from './Authentication/AuthenticationStore';
 const styles = (theme: Theme) => createStyles({
     button: {
         margin: theme.spacing.unit,
-      },
-      input: {
+    },
+    container: {
+        maxWidth: 300,
+        margin: "auto",
+    },
+    input: {
         display: 'none',
-      },
+    },
 });
 
 interface HomePageProps extends WithStyles<typeof styles> {
@@ -51,14 +55,15 @@ class HomePage extends React.Component<HomePageProps, {}> {
     public render() {
         const { classes } = this.props;
         return (
-            <Button 
-                variant="outlined" 
-                className={classes.button}
-                href="https://github.com/login/oauth/authorize?&client_id=1eb8e00f3ac5bcfa3b42"
-            >
-                <Icon />
-                Log In with GitHub
-            </Button>
+            <div className={classes.container}>
+                <Button 
+                    variant="outlined" 
+                    className={classes.button}
+                    href="https://github.com/login/oauth/authorize?&client_id=1eb8e00f3ac5bcfa3b42"
+                >
+                    Log In with GitHub
+                </Button>
+            </div>
         );
     }
 }

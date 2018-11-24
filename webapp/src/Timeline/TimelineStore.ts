@@ -18,4 +18,8 @@ export default class TimelineStore {
     set recommendedProjects(recommendedProjects: Project[]) {
         this._recommendedProjects = recommendedProjects;
     }
+
+    @observable private _waiting: boolean = false;
+    @computed get waiting(): boolean { return this._waiting; }
+    set waiting(waiting: boolean) { this._waiting = waiting; }
 }
