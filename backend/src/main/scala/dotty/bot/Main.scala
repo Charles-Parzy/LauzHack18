@@ -3,7 +3,7 @@ package dotty.bot
 
 import dotty.bot.Decorators._
 import dotty.bot.model.Github
-import dotty.bot.model.Github.{AccessToken, PublicRepository}
+import dotty.bot.model.Github.{AccessToken, Repository}
 import dotty.bot.model.LauzHack.User
 import requests.RequestAuth
 import ujson.Js
@@ -52,8 +52,30 @@ object Main extends cask.MainRoutes {
       ghAPI(s"/search/repositories?q=$l+$top&sort=stars&order=desc"),
       headers = Map ("Accept" -> "application/vnd.github.mercy-preview+json"))
     if (response.is2xx) {
-      val repos = read[List[PublicRepository]](response.text)
+      val repos = read[List[Repository]](response.text)
       Ok(timelineToJson(repos))
+    } else {
+      BadRequest(response.statusMessage)
+    }
+  }
+
+  @cask.get("/project")
+  def project(token: String, owner: String, repo: String) = {
+    val response = requests.get(ghAPI(s"/repos/$owner/$repo"))
+    val issues = getIssues(owner, repo)
+    if (response.is2xx) {
+      val repo = read[Github.Repository](response.text)
+      val cleaned = Js.Obj(
+        "full_name" -> Js.Str(repo.full_name),
+        "name" -> Js.Str(repo.name),
+        "url" -> Js.Str(repo.html_url),
+        "description" -> Js.Str(repo.description),
+        "followed" ->  Js.Bool(false),
+        "owner" -> Js.Str(repo.owner.login),
+        "topics" -> repo.topics,
+        "issues" -> issues
+      )
+      Ok(ujson.write(cleaned))
     } else {
       BadRequest(response.statusMessage)
     }
@@ -71,8 +93,7 @@ object Main extends cask.MainRoutes {
     Ok(s"Suce ${user.token}!")
   }
 
-  @cask.get("/issues")
-  def issues(owner: String, repo: String) = {
+  private def getIssues(owner: String, repo: String) = {
     val response = requests.get(
       ghAPI(s"/repos/$owner/$repo/issues"),
       params = Map(
@@ -91,19 +112,20 @@ object Main extends cask.MainRoutes {
           "user" -> Js.Str(i.user.login)
         )
       }
-      Ok(ujson.write(cleaned))
+      cleaned
     }
     else
-      BadRequest(response.statusMessage)
+      List.empty
 
   }
 
-  private def timelineToJson(repos: List[PublicRepository]): String = {
+  private def timelineToJson(repos: List[Repository]): String = {
     val recommendedRepo = repos.map(i => {
         Js.Obj(
-          "id"  -> Js.Num(i.id),
+          "full_name"  -> Js.Str(i.full_name),
           "name"   -> Js.Str(i.name),
-          "description" -> Js.Str(i.description)
+          "description" -> Js.Str(i.description),
+          "owner" -> Js.Str(i.owner.login)
         )
     })
     val res = Js.Obj(

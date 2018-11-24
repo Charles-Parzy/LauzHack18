@@ -21,7 +21,14 @@ object Github {
   }
 
   // https://developer.github.com/v3/repos/
-  case class Repository(name: String, full_name: String)
+  case class Repository(
+    name: String,
+    full_name: String,
+    description: String,
+    html_url: String,
+    topics: Seq[String] = Nil,
+    owner: User
+  )
   object Repository {
     implicit def reader: Reader[Repository] = macroR
   }
@@ -95,14 +102,5 @@ object Github {
   case class AccessToken(access_token: String)
   object AccessToken {
     implicit def rw: ReadWriter[AccessToken] = macroRW
-  }
-
-  case class PublicRepository(
-    id: Int,
-    name: String,
-    description: String
-  )
-  object PublicRepository {
-    implicit def reader: ReadWriter[PublicRepository] = macroRW
   }
 }
