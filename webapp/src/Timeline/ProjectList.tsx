@@ -1,6 +1,6 @@
 /* tslint:disable */
 import * as React from "react";
-import { Project } from 'src/GithubProject';
+import { Project } from '../GithubProject';
 import { List, ListItem, ListItemText } from '@material-ui/core';
 import { RouterStore } from 'mobx-react-router';
 

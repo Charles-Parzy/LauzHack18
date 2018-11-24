@@ -37,8 +37,16 @@ export class Project {
         return this._followed;
     }
 
-    printTags(): string {
-        return this._tags.join(", ");
+    get tags(): string[] {
+        return this._tags;
+    }
+
+    set follow(value: boolean) {
+        this._followed = value;
+    }
+
+    printFollow(): string {
+        return this._followed ? "Unfollow" : "Follow";
     }
 
     getTitle() {
@@ -59,11 +67,13 @@ export class Project {
 export class Issue {
     private _id: string;
     private _title: string;
+    private _subtext: string;
 
 
-    constructor(id: string, title: string) {
+    constructor(id: string, title: string, subtext: string) {
         this._id = id;
         this._title = title;
+        this._subtext = subtext;
     }
 
     get id(): string {
@@ -72,6 +82,10 @@ export class Issue {
 
     get title(): string {
         return this._title;
+    }
+
+    get subtext(): string {
+        return this._subtext;
     }
 
     url(user: string, name: string) {
