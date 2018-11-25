@@ -3,8 +3,9 @@ export default class User {
     private _avatarUrl: string;
     private _topics: string[];
     private _languages: string[];
+    private _trophies: number[];
 
-    constructor(name: string, avatarUrl: string, topics: string[], languages: string[]) {
+    constructor(name: string, avatarUrl: string, topics: string[], languages: string[], trophies: number[]) {
         this._name = name;
         this._avatarUrl = avatarUrl;
         this._topics = topics;
@@ -15,4 +16,5 @@ export default class User {
     public get avatarUrl(): string { return this._avatarUrl; }
     public get topics(): string[] { return this._topics; }
     public get languages(): string[] { return this._languages; }
+    public get trophies(): number[] { return this._trophies; }
 }

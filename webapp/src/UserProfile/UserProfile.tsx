@@ -7,6 +7,7 @@ import { observable, computed } from 'mobx';
 import AuthenticationStore from 'src/Authentication/AuthenticationStore';
 import { observer, inject } from 'mobx-react';
 import {RouterStore} from "mobx-react-router";
+import TrophiesBadge from './TrophiesBadge';
 
 const styles = (theme: Theme) => createStyles({
     container: {
@@ -111,7 +112,7 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
         fetch(request).then(res => res.json())
         .then(res => {
             console.log('Success:', JSON.stringify(res));
-            this.user = new User(res.name, res.picture, res.topics, res.languages);
+            this.user = new User(res.name, res.picture, res.topics, res.languages, res.trophies);
             this.topics = this.user.topics;
             this.languages = this.user.languages;
             this.waiting = false;
@@ -204,6 +205,7 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
                             {this.user.name}
                         </h1>
                     </div>
+                    <TrophiesBadge trophies={this.user.trophies}/>
                     <h2>
                         Topics
                     </h2>
