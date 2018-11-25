@@ -12,7 +12,14 @@ object Main extends cask.MainRoutes {
   def CLIENT_ID = "1eb8e00f3ac5bcfa3b42"
   def CLIENT_SECRET = "7243931f96aec1e7ba7c4638e65365bba78f3f44"
 
+  def GITHUB_USER = "allanrenucci"
+  def GITHUB_TKN = "6c875951c64484cb9de5a2c0b994471deef54c3c"
+
   override def debugMode: Boolean = true
+
+  val ghSession = requests.Session(
+    auth = new RequestAuth.Basic(GITHUB_USER, GITHUB_TKN)
+  )
 
   class OAuth2(token: String) extends RequestAuth {
     def header = Some(s"token $token")
@@ -27,7 +34,7 @@ object Main extends cask.MainRoutes {
 
   @cask.get("/generateToken")
   def generateToken(code: String) = {
-    val response = requests.post(
+    val response = ghSession.post(
       s"https://github.com/login/oauth/access_token?client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&code=$code",
       headers = Map("Accept" -> "application/json")
     )
@@ -91,8 +98,7 @@ object Main extends cask.MainRoutes {
 
   @cask.get("/")
   def root() = {
-    implicit val token = "d8d87e3a68c43741fa2e5730534e952c8ae814f9"
-    ghUserSession.get(ghAPI("/user")).text
+    ghSession.get(ghAPI("/user")).text
   }
 
   @cask.get("/test-logged-in")
@@ -142,7 +148,7 @@ object Main extends cask.MainRoutes {
   @cask.get("/follow")
   def follow(token: String, owner: String, repo: String) = {
     val user = DB.getUser(token)
-    val fullName = owner + repo
+    val fullName = s"$owner/$repo"
 
     // Adding repo to cache
     val ghRepo = read[Repository](ghUserSession(token).get(ghAPI(s"/repos/$owner/$repo")).text)
@@ -167,7 +173,7 @@ object Main extends cask.MainRoutes {
   @cask.get("/unfollow")
   def unfollow(token: String, owner: String, repo: String) = {
     val user = DB.getUser(token)
-    val fullName = owner + repo
+    val fullName = s"$owner/$repo"
     user.followedRepos -= fullName
     val toSend = user.followedRepos.toList.map(DB.repositories(_))
     Ok(write[List[LauzHack.Repository]](toSend))
