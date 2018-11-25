@@ -294,8 +294,12 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
                         }
                     </div>
                     {
-                        !this.topics.length && !this.editing && <Typography>Please choose some topics you are interested in</Typography>
-                    }
+                        !this.topics.length && !this.editing && (
+                        <>
+                            <div style={{marginTop: 10}}/>
+                            <Typography>Please choose some topics you are interested in</Typography>
+                        </>
+                        )}
                     {
                         this.editing && (
                             <div style={{display: "flex", alignItems: "center"}}>
@@ -329,8 +333,12 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
                         }
                     </div>
                     {
-                        !this.languages.length && !this.editing && <Typography>Please choose some programming languages you want to code</Typography>
-                    }
+                        !this.languages.length && !this.editing && (
+                        <>
+                            <div style={{marginTop: 10}}/>
+                            <Typography>Please choose some programming languages you want to code</Typography>
+                        </>
+                        )}
                     {
                         this.editing && (
                             <div style={{display: "flex", alignItems: "center"}}>

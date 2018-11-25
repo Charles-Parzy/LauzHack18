@@ -1,9 +1,10 @@
 /* tslint:disable */
 import * as React from "react";
-import {Button, createStyles, Theme, withStyles, WithStyles} from '@material-ui/core';
+import {Button, createStyles, Theme, withStyles, WithStyles, CircularProgress} from '@material-ui/core';
 import {RouterStore} from 'mobx-react-router';
 import {observer, inject} from 'mobx-react';
 import AuthenticationStore from './Authentication/AuthenticationStore';
+import ComponentContainer from './Utils/ComponentContainer';
 
 const styles = (theme: Theme) => createStyles({
     button: {
@@ -17,6 +18,11 @@ const styles = (theme: Theme) => createStyles({
     },
     input: {
         display: 'none',
+    },
+    spinnerContainer: {
+        display: "flex",
+        flexContainer: "center",
+        alignItems: "center",
     },
 });
 
@@ -55,18 +61,46 @@ class HomePage extends React.Component<HomePageProps, {}> {
     }
 
     public render() {
-        const {classes} = this.props;
-        return (
-            <div className={classes.container}>
-                <Button
-                    variant="outlined"
-                    href="https://github.com/login/oauth/authorize?&client_id=1eb8e00f3ac5bcfa3b42"
-                    color="primary"
-                    size="large"
+        const {auth, classes, routing} = this.props;
+        const {location} = routing;
+        const params = new URLSearchParams(location.search);
+        const code = params.get('code');
+        if (!!code) {
+            return (
+                <ComponentContainer
+                    auth={auth}
+                    barTitle="OpenHub"
+                    back={false}
+                    routing={this.props.routing}
                 >
-                    Log In with GitHub
-                </Button>
-            </div>
+                    <div className={classes.spinnerContainer}>
+                        <CircularProgress />
+                    </div>
+                </ComponentContainer>
+            )
+        }
+        return (
+            <ComponentContainer
+                auth={auth}
+                barTitle="OpenHub"
+                back={false}
+                routing={this.props.routing}
+            >
+                <div className={classes.container}>
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                        <img src="https://pbs.twimg.com/profile_images/767793963432546304/h-qs8imH_400x400.jpg" style={{width: 200, height: 200}}></img>
+                        <div style={{margin: 20}}/>
+                        <Button
+                            variant="outlined"
+                            href="https://github.com/login/oauth/authorize?&client_id=1eb8e00f3ac5bcfa3b42"
+                            color="primary"
+                            size="large"
+                        >
+                            Log In with GitHub
+                        </Button>
+                    </div>
+                </div>
+            </ComponentContainer>
         );
     }
 }

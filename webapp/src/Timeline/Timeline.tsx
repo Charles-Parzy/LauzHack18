@@ -57,9 +57,16 @@ class Timeline extends React.Component<TimelineProps, {}> {
         const { followedProjects, recommendedProjects } = timeline;
         if (timeline.waiting) {
             return (
-                <div className={classes.spinnerContainer}>
-                    <CircularProgress />
-                </div>
+                <ComponentContainer
+                    auth={auth}
+                    barTitle="Timeline"
+                    back={false}
+                    routing={this.props.routing}
+                >
+                    <div className={classes.spinnerContainer}>
+                        <CircularProgress />
+                    </div>
+                </ComponentContainer>
             );
         }
         return (
