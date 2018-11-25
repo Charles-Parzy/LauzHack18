@@ -25,7 +25,7 @@ object Main extends cask.MainRoutes {
     def header = Some(s"token $token")
   }
 
-  def ghUserSession(implicit token: String) = requests.Session(
+  def ghUserSession(token: String) = requests.Session(
     auth = new OAuth2(token)
   )
 
@@ -41,8 +41,9 @@ object Main extends cask.MainRoutes {
 
     if (response.is2xx) {
       val signature = read[AccessToken](response.text)
-      DB.addUser(signature.access_token)
-      write[AccessToken](signature)
+      val user = read[Github.User](
+        ghUserSession(signature.access_token).get(ghAPI("/user")).text)
+      DB.addUser(signature.access_token, user.login)
       Ok(write[AccessToken](signature))
     } else {
       BadRequest(response.statusMessage)
@@ -195,6 +196,20 @@ object Main extends cask.MainRoutes {
     user.topics ++= updatedUser.topics
   }
 
+  @cask.get("/prs")
+  def mergedPRs(token: String) = {
+    val user = DB.getUser(token)
+    val params = List(
+      "type:pr",
+      s"author:${user.login}",
+      "is:merged"
+    )
+    val query = params.mkString("+")
+    val response = ghUserSession(token).get(ghAPI("/search/issues?q=" + query))
+    val count = ujson.read(response.text).obj("total_count").num.toInt
+    Ok(count.toString)
+  }
+
   private def timelineToJson(repos: List[Repository]): String = {
     val recommendedRepo = repos.map(i => {
         Js.Obj(
@@ -213,5 +228,5 @@ object Main extends cask.MainRoutes {
 
   initialize()
 
-  DB.addUser("d8d87e3a68c43741fa2e5730534e952c8ae814f9") // adding Mikael
+  DB.addUser("d8d87e3a68c43741fa2e5730534e952c8ae814f9", "MikaelMorales")
 }

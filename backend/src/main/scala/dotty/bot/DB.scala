@@ -8,8 +8,8 @@ object DB {
   /** Token to User */
   private val users = new mutable.HashMap[String, User]()
 
-  def addUser(token: String): Unit = {
-    users += token -> User(token)
+  def addUser(token: String, login: String): Unit = {
+    users += token -> User(token, login)
   }
 
   def getUser(token: String): User =

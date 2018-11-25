@@ -8,12 +8,14 @@ object LauzHack {
 
   case class User(
     token: String,
+    login: String,
     followedRepos: mutable.Set[String],
     topics: mutable.Set[String],
     languages: mutable.Set[String]
   )
   object User {
-    def apply(token: String): User = new User(token, new mutable.HashSet, new mutable.HashSet, new mutable.HashSet)
+    def apply(token: String, login: String): User =
+      new User(token, login, new mutable.HashSet, new mutable.HashSet, new mutable.HashSet)
   }
 
   case class Repository(
