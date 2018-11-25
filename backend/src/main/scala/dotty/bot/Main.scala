@@ -70,7 +70,7 @@ object Main extends cask.MainRoutes {
       }
       repos = read[List[Repository]](response.text)
     }
-    Ok(timelineToJson(repos))
+    Ok(timelineToJson(token, repos))
   }
 
   @cask.get("/project")
@@ -197,7 +197,7 @@ object Main extends cask.MainRoutes {
       List.empty
   }
 
-  private def timelineToJson(repos: List[Repository]): String = {
+  private def timelineToJson(token: String, repos: List[Repository]): String = {
     val recommendedRepo = repos.map(i => {
         Js.Obj(
           "full_name"  -> Js.Str(i.full_name),
@@ -206,9 +206,19 @@ object Main extends cask.MainRoutes {
           "owner" -> Js.Str(i.owner.login)
         )
     })
+    val user = DB.getUser(token)
+    val followed = user.followedRepos.map(r => {
+      val rep = DB.repositories(r)
+      Js.Obj(
+        "full_name"  -> Js.Str(rep.full_name),
+        "name"   -> Js.Str(rep.name),
+        "description" -> Js.Str(rep.description),
+        "owner" -> Js.Str(rep.owner)
+      )
+    })
     val res = Js.Obj(
       "recommended_projects" -> recommendedRepo,
-      "followed_projects" -> Js.Arr()
+      "followed_projects" -> followed
     )
     ujson.write(res)
   }
