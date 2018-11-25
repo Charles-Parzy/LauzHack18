@@ -120,31 +120,6 @@ object Main extends cask.MainRoutes {
     Ok(ujson.write(profile))
   }
 
-  private def getIssues(token: String, owner: String, repo: String) = {
-    val response = ghUserSession(token).get(
-      ghAPI(s"/repos/$owner/$repo/issues"),
-      params = Map(
-        "labels" -> "help wanted"
-      )
-    )
-
-    if (response.is2xx) {
-      val issues = read[List[Github.Issue]](response.text)
-      val cleaned = issues.map { i =>
-        Js.Obj(
-          "number" -> Js.Num(i.number),
-          "title" -> Js.Str(i.title),
-          "url" -> Js.Str(i.html_url),
-          "created" -> Js.Str(i.created_at),
-          "user" -> Js.Str(i.user.login)
-        )
-      }
-      cleaned
-    }
-    else
-      List.empty
-  }
-
   @cask.get("/follow")
   def follow(token: String, owner: String, repo: String) = {
     val user = DB.getUser(token)
@@ -195,6 +170,31 @@ object Main extends cask.MainRoutes {
     user.languages ++= updatedUser.languages
     user.topics.clear()
     user.topics ++= updatedUser.topics
+  }
+
+  private def getIssues(token: String, owner: String, repo: String) = {
+    val response = ghUserSession(token).get(
+      ghAPI(s"/repos/$owner/$repo/issues"),
+      params = Map(
+        "labels" -> "help wanted"
+      )
+    )
+
+    if (response.is2xx) {
+      val issues = read[List[Github.Issue]](response.text)
+      val cleaned = issues.map { i =>
+        Js.Obj(
+          "number" -> Js.Num(i.number),
+          "title" -> Js.Str(i.title),
+          "url" -> Js.Str(i.html_url),
+          "created" -> Js.Str(i.created_at),
+          "user" -> Js.Str(i.user.login)
+        )
+      }
+      cleaned
+    }
+    else
+      List.empty
   }
 
   private def timelineToJson(repos: List[Repository]): String = {
