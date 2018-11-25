@@ -162,7 +162,7 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
         fetch(request).then(res => res.json())
             .then(res => {
                 console.log('Success:', JSON.stringify(res));
-                this.user = new User(res.name, res.picture, res.topics, res.languages, [0, 0, 0]);
+                this.user = new User(res.name, res.picture, res.topics, res.languages, res.trophies);
                 this.topics = this.user.topics;
                 this.languages = this.user.languages;
                 this.waiting = false;
