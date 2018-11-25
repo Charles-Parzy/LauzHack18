@@ -152,13 +152,13 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
 
     private handleDeleteLanguage = (language: string) => () => {
         const langTmp = this.languages;
-        langTmp.splice(langTmp.indexOf(language));
+        langTmp.splice(langTmp.indexOf(language), 1);
         this.languages = langTmp;
     }
 
     private handleDeleteTopic = (topic: string) => () => {
         const topicsTmp = this.topics;
-        topicsTmp.splice(topicsTmp.indexOf(topic));
+        topicsTmp.splice(topicsTmp.indexOf(topic), 1);
         this.topics = topicsTmp;
     }
 
