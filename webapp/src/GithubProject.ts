@@ -1,98 +1,83 @@
 export class Project {
-    private _id: string;
-    private _user: string;
-    private _name: string;
+    private _fullname: string;
+    private _owner: string;
+    private _repo: string;
+    private _url: string;
     private _description: string;
     private _tags: string[];
     private _issues: Issue[];
-    private _followed: boolean;
 
-    constructor(id: string, user: string, name: string, description: string, tags: string[], issues: Issue[], followed:boolean) {
-        this._id = id;
-        this._user = user;
-        this._name = name;
+    constructor(fullname: string, owner: string, repo: string, url:string, description: string, tags: string[], issues: Issue[]) {
+        this._fullname = fullname;
+        this._owner = owner;
+        this._repo = repo;
+        this._url = url;
         this._description = description;
         this._tags = tags;
         this._issues = issues;
-        this._followed = followed;
     }
 
-    get id(): string {
-        return this._id;
+    get fullname(): string {
+        return this._fullname;
     }
 
-    get user(): string {
-        return this._user;
+    get owner(): string {
+        return this._owner;
     }
 
-    get name(): string {
-        return this._name;
+    get repo(): string {
+        return this._repo;
     }
 
     get description(): string {
         return this._description;
     }
 
-    get followed(): boolean {
-        return this._followed;
-    }
-
     get tags(): string[] {
         return this._tags;
     }
 
-    set follow(value: boolean) {
-        this._followed = value;
-    }
-
     static fromJson(json: any): Project {
-        return new Project(json.full_name, json.owner, json.repo, json.description, json.topics, json.issues.map(Issue.fromJson), json.followed);
-    }
-
-    getTitle() {
-        return this._user + "/" + this._name
+        return new Project(json.full_name, json.owner, json.name, json.url, json.description, json.topics, json.issues.map(Issue.fromJson));
     }
 
     get issues(): Issue[] {
         return this._issues;
     }
 
-    url(): string {
-        return `https://github.com/${this._user}/${this._name}`;
+    get url(): string {
+        return this._url;
     }
 
 }
 
 
 export class Issue {
-    private _id: string;
     private _title: string;
+    private _url: string;
     private _subtext: string;
 
 
-    constructor(id: string, title: string, subtext: string) {
-        this._id = id;
+    constructor(title: string, url: string, subtext: string) {
         this._title = title;
+        this._url = url;
         this._subtext = subtext;
     }
 
     static fromJson(json: any): Issue {
-        return new Issue(json.number, json.title, "secondary");
+        return new Issue(json.title, json.url, `#${json.number} created ${json.created.substr(0, 10)} by ${json.user}`);
     }
 
-    get id(): string {
-        return this._id;
-    }
 
     get title(): string {
         return this._title;
     }
 
-    get subtext(): string {
-        return this._subtext;
+    get url(): string {
+        return this._url;
     }
 
-    url(user: string, name: string) {
-        return `https://github.com/${user}/${name}/issues/${this._id}`
+    get subtext(): string {
+        return this._subtext;
     }
 }

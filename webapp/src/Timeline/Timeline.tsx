@@ -39,8 +39,8 @@ class Timeline extends React.Component<TimelineProps, {}> {
         fetch(request).then(res => res.json())
         .then(res => {
             console.log('Success:', JSON.stringify(res));
-            timeline.followedProjects = res.followed_projects.map((p: any) => new Project(p.full_name, p.owner, p.name, p.description, [], [], false));
-            timeline.recommendedProjects = res.recommended_projects.map((p: any) => new Project(p.full_name, p.owner, p.name, p.description, [], [], false));
+            timeline.followedProjects = res.followed_projects.map(Project.fromJson);
+            timeline.recommendedProjects = res.recommended_projects.map(Project.fromJson);
             timeline.waiting = false;
         })
         .catch(err => {

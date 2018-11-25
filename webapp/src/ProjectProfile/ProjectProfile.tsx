@@ -93,7 +93,7 @@ class ProjectProfile extends React.Component<ProjectProfileProps, ProjectProfile
             >
                 <div className="information">
                     <div className="title">
-                        <Typography variant="h2">{project.getTitle()}</Typography>
+                        <Typography variant="h2">{project.fullname}</Typography>
                     </div>
                     <div className="details">
                         <Typography variant="h6">
@@ -120,7 +120,7 @@ class ProjectProfile extends React.Component<ProjectProfileProps, ProjectProfile
     private updateFollow(): void {
         const {followed, project} = this;
         console.log(followed);
-        let url: string = `http://localhost:8080/${followed ? "unfollow" : "follow"}?token=${this.props.auth.token}&owner=${project.user}&repo=${project.name}`;
+        let url: string = `http://localhost:8080/${followed ? "unfollow" : "follow"}?token=${this.props.auth.token}&owner=${project.owner}&repo=${project.repo}`;
         const request = new Request(url);
         fetch(request).then(res => res.json())
             .then(unused => {
@@ -147,8 +147,8 @@ class ProjectProfile extends React.Component<ProjectProfileProps, ProjectProfile
             <List>
                 {project.issues.map(function (issue: Issue, index: number) {
                     return <ListItem key={index} button component="a"
-                                     href={issue.url(project.user, project.name)}><ListItemText primary={issue.title}
-                                                                                                secondary={issue.subtext}/></ListItem>;
+                                     href={issue.url}><ListItemText primary={issue.title}
+                                                                    secondary={issue.subtext}/></ListItem>;
                 })}
             </List>
         )
