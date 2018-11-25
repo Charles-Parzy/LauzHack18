@@ -56,7 +56,7 @@ object Main extends cask.MainRoutes {
     val topics = user.topics.map(s => "topic:" + s).mkString("+")
     val languages = user.languages.map(s => "language:" + s).mkString("+")
     var repos: Seq[Github.Repository] = List.empty
-    if (!topics.isEmpty && !languages.isEmpty) {
+    if (!topics.isEmpty || !languages.isEmpty) {
       var query = topics
       if (!query.isEmpty) {
         query += "+" + languages
