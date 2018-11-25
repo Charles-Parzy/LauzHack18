@@ -8,8 +8,6 @@ import requests.RequestAuth
 import ujson.Js
 import upickle.default.{read, write}
 
-import scala.collection.mutable
-
 object Main extends cask.MainRoutes {
   // LauzHack Github app
   def CLIENT_ID = "1eb8e00f3ac5bcfa3b42"
@@ -58,7 +56,7 @@ object Main extends cask.MainRoutes {
     val user = DB.getUser(token)
     val topics = user.topics.map(s => "topic:" + s).mkString("+")
     val languages = user.languages.map(s => "language:" + s).mkString("+")
-    var res: Seq[Github.Repository] = List.empty
+    var repos: Seq[Github.Repository] = List.empty
     if (!topics.isEmpty || !languages.isEmpty) {
       var query = topics
       if (!query.isEmpty) {
@@ -73,27 +71,9 @@ object Main extends cask.MainRoutes {
       if (!response.is2xx) {
         BadRequest(response.statusMessage)
       }
-
-      val repos = read[Repositories](response.text).items
-      val inter = repos.map(t => t.full_name).toSet
-
-      val set = new mutable.HashSet[Github.Repository]()
-      topics.split("+").foreach(t => getRepos(token, set, t))
-      languages.split("+").foreach(t => getRepos(token, set, t))
-      res = repos ++ set.filter(r => !inter.contains(r.full_name))
+      repos = read[Repositories](response.text).items
     }
-    Ok(timelineToJson(token, res))
-  }
-
-  private def getRepos(token: String, set: mutable.HashSet[Github.Repository], query: String): Unit = {
-    val response = ghUserSession(token).get(
-      ghAPI(s"/search/repositories?q=$query&sort=stars&order=desc"),
-      headers = Map ("Accept" -> "application/vnd.github.mercy-preview+json"))
-    if (!response.is2xx) {
-      BadRequest(response.statusMessage)
-    }
-    println(response.text)
-    set ++= read[Repositories](response.text).items
+    Ok(timelineToJson(token, repos))
   }
 
   @cask.get("/project")
