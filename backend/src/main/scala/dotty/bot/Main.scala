@@ -1,7 +1,7 @@
 package dotty.bot
 
 import dotty.bot.model.{Github, LauzHack}
-import dotty.bot.model.Github.{AccessToken, Repository, UserUpdate}
+import dotty.bot.model.Github.{AccessToken, Repositories, Repository, UserUpdate}
 import dotty.bot.model.LauzHack.{Trophies, User}
 import requests.RequestAuth
 import ujson.Js
@@ -54,7 +54,7 @@ object Main extends cask.MainRoutes {
     val user = DB.getUser(token)
     val topics = user.topics.map(s => "topic:" + s).mkString("+")
     val languages = user.languages.map(s => "language:" + s).mkString("+")
-    var repos: List[Github.Repository] = List.empty
+    var repos: Seq[Github.Repository] = List.empty
     if (!topics.isEmpty && !languages.isEmpty) {
       var query = topics
       if (!query.isEmpty) {
@@ -68,7 +68,8 @@ object Main extends cask.MainRoutes {
       if (!response.is2xx) {
         BadRequest(response.statusMessage)
       }
-      repos = read[List[Repository]](response.text)
+      println(response.text)
+      repos = read[Repositories](response.text).items
     }
     Ok(timelineToJson(token, repos))
   }
@@ -202,7 +203,7 @@ object Main extends cask.MainRoutes {
       List.empty
   }
 
-  private def timelineToJson(token: String, repos: List[Repository]): String = {
+  private def timelineToJson(token: String, repos: Seq[Repository]): String = {
     val recommendedRepo = repos.map(i => {
         Js.Obj(
           "full_name"  -> Js.Str(i.full_name),
