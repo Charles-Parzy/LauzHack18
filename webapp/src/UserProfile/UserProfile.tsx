@@ -150,6 +150,18 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
         this.languageBeingAdded = "";
     }
 
+    private handleDeleteLanguage = (language: string) => () => {
+        const langTmp = this.languages;
+        langTmp.splice(langTmp.indexOf(language));
+        this.languages = langTmp;
+    }
+
+    private handleDeleteTopic = (topic: string) => () => {
+        const topicsTmp = this.topics;
+        topicsTmp.splice(topicsTmp.indexOf(topic));
+        this.topics = topicsTmp;
+    }
+
     public render() {
         const { classes } = this.props;
         const buttonText = this.editing ? "Save" : "Edit";
@@ -197,7 +209,12 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
                     </h2>
                     <div style={{ display: "flex" }}>
                     {
-                        this.topics.map((t, i) => <Chip key={i} label={t} className={classes.chip} />)
+                        this.topics.map((t, i) => {
+                            if (this.editing) {
+                                return <Chip onDelete={this.handleDeleteTopic(t)} key={i} label={t} className={classes.chip} />
+                            }
+                            return <Chip key={i} label={t} className={classes.chip} />
+                        })
                     }
                     </div>
                     {
@@ -225,7 +242,12 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
                     </h2>
                     <div style={{ display: "flex" }}>
                     {
-                        this.languages.map((l, i) => <Chip key={i} label={l} className={classes.chip} />)
+                        this.languages.map((l, i) => {
+                            if (this.editing) {
+                                return <Chip onDelete={this.handleDeleteLanguage(l)} key={i} label={l} className={classes.chip} />
+                            }
+                            return <Chip key={i} label={l} className={classes.chip} />
+                        })
                     }
                     </div>
                     {
