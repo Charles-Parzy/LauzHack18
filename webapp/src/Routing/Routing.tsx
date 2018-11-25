@@ -27,7 +27,6 @@ const stores = {
 const history = syncHistoryWithStore(browserHistory, routingStore);
 
 export default class Routing extends React.Component<{}, {}> {
-
     public render() {
         return (
             <Provider {...stores}>

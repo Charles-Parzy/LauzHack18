@@ -29,8 +29,10 @@ interface TimelineProps extends WithStyles<typeof styles> {
 class Timeline extends React.Component<TimelineProps, {}> {
 
     componentWillMount() {
+        const { auth } = this.props;
         // Do the request for the followed and recommended projects
         this.fetchData();
+        window.setInterval(() => auth.getNotification(auth.token), 10000);
     }
 
     private fetchData() {
