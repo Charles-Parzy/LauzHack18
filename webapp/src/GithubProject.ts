@@ -7,7 +7,7 @@ export class Project {
     private _tags: string[];
     private _issues: Issue[];
 
-    constructor(fullname: string, owner: string, repo: string, url:string, description: string, tags: string[], issues: Issue[]) {
+    constructor(fullname: string, owner: string, repo: string, url: string, description: string, tags: string[], issues: Issue[]) {
         this._fullname = fullname;
         this._owner = owner;
         this._repo = repo;

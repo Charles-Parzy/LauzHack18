@@ -1,5 +1,5 @@
 import * as React from "react";
-import { AppBar, Toolbar, Typography, Button, createStyles, WithStyles, withStyles } from '@material-ui/core';
+import {AppBar, Toolbar, Typography, Button, createStyles, WithStyles, withStyles} from '@material-ui/core';
 
 const styles = () => createStyles({
     childrenContainer: {
@@ -16,7 +16,7 @@ const styles = () => createStyles({
     }
 })
 
-interface ComponentContainerProps extends WithStyles<typeof styles>  {
+interface ComponentContainerProps extends WithStyles<typeof styles> {
     barTitle: string;
     buttonCallback?: (event: any) => void;
     buttonText?: string;
@@ -26,7 +26,7 @@ interface ComponentContainerProps extends WithStyles<typeof styles>  {
 
 class ComponentContainer extends React.Component<ComponentContainerProps, {}> {
     public render() {
-        const { barTitle, buttonText, buttonCallback, buttonVariant, children, classes } = this.props;
+        const {barTitle, buttonText, buttonCallback, buttonVariant, children, classes} = this.props;
         const displayButton: boolean = !!buttonCallback && !!buttonText;
         return (
             <div>
@@ -35,11 +35,13 @@ class ComponentContainer extends React.Component<ComponentContainerProps, {}> {
                         <Typography variant="title" color="inherit" className={classes.flex}>
                             {barTitle}
                         </Typography>
-                        { displayButton && <Button color="primary" className={classes.button} variant={buttonVariant || "text"} onClick={buttonCallback}>{buttonText}</Button>}
+                        {displayButton &&
+                        <Button color="primary" className={classes.button} variant={buttonVariant || "text"}
+                                onClick={buttonCallback}>{buttonText}</Button>}
                     </Toolbar>
                 </AppBar>
-                <AppBar position="fixed" />
-                <Toolbar />
+                <AppBar position="fixed"/>
+                <Toolbar/>
                 <div className={classes.childrenContainer}>
                     {children}
                 </div>
