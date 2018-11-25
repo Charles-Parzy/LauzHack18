@@ -208,7 +208,7 @@ object Main extends cask.MainRoutes {
     val user = DB.getUser(token)
     val followed = user.followedRepos.map(r => DB.repositories(r))
     val set = followed.map(i => i.full_name).toSet
-    val recommended = recommendedRepo.filter(p => set.contains(p.full_name))
+    val recommended = recommendedRepo.filter(p => !set.contains(p.full_name))
     val jsonRecommended = recommended.map(i => {
       Js.Obj(
         "full_name" -> Js.Str(i.full_name),
