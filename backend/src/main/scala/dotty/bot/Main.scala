@@ -77,7 +77,10 @@ object Main extends cask.MainRoutes {
 
   @cask.get("/project")
   def project(token: String, owner: String, repo: String) = {
-    val response = ghUserSession(token).get(ghAPI(s"/repos/$owner/$repo"))
+    val response = ghUserSession(token).get(
+      ghAPI(s"/repos/$owner/$repo"),
+      headers = Map ("Accept" -> "application/vnd.github.mercy-preview+json")
+    )
     val issues = getIssues(token, owner, repo)
     val user = DB.getUser(token)
     if (response.is2xx) {
