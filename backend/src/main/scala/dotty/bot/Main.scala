@@ -2,7 +2,7 @@ package dotty.bot
 
 import cask.model.Response
 import dotty.bot.model.{Github, LauzHack}
-import dotty.bot.model.Github.{AccessToken, Repositories, Repository, UserUpdate}
+import dotty.bot.model.Github.{AccessToken, Repositories, Repository, UserUpdate, PullRequests}
 import dotty.bot.model.LauzHack.User
 import requests.RequestAuth
 import ujson.Js
@@ -117,18 +117,14 @@ object Main extends cask.MainRoutes {
     val user = DB.getUser(token)
     val response = ghUserSession(token).get(ghAPI("/user"))
     val ghUser = read[Github.User](response.text)
-    val trophyCount =
-      if (user.prCount >= 20) 3
-      else if (user.prCount >= 10) 2
-      else if (user.prCount >= 5) 1
-      else 0
+    val trophyCount = mergedPRs(user)
+
     val profile = Js.Obj(
       "name" -> Js.Str(ghUser.login),
       "picture" -> Js.Str(ghUser.avatar_url),
       "topics" -> user.topics,
       "languages" -> user.languages,
-      "trophies" -> Js.Num(trophyCount),
-      "pr-merged" -> Js.Num(user.prCount)
+      "trophies" -> Js.Arr(trophyCount._1, trophyCount._2, trophyCount._3)
     )
     Ok(ujson.write(profile))
   }
@@ -186,17 +182,24 @@ object Main extends cask.MainRoutes {
   }
 
 
-  private def mergedPRs(user: User): Int = {
+  private def mergedPRs(user: User): (Int, Int, Int) = {
     val params = List(
       "type:pr",
       s"author:${user.login}",
       "is:merged"
     )
     val query = params.mkString("+")
-    val response = ghUserSession(user.token).get(ghAPI("/search/issues?q=" + query))
-    val count = ujson.read(response.text).obj("total_count").num.toInt
-    count
+    val response = ghUserSession(user.token).get(ghAPI("/search/issues?q=" + query)).text
+    println(response)
+    val counts = read[PullRequests](response).items.map(_.repository_url).groupBy(identity).mapValues(_.size).values
+    println(counts)
+    val bronze = counts.count(i => i >= 5 && i < 10)
+    val argent = counts.count(i => i >= 10  && i < 20)
+    val gold = counts.count(i => i >= 20)
+
+    (bronze, argent, gold)
   }
+
 
   @cask.get("/notifications")
   def notifications(token: String): Response = {
@@ -206,15 +209,16 @@ object Main extends cask.MainRoutes {
     var newPR = false
     var newTropy = "none"
 
-    if (prCount > user.prCount) {
-      user.prCount = prCount
+    if (prCount != user.prCount) {
       newPR = true
-      if (user.prCount == 20)
+      if (user.prCount._3 < prCount._3)
         newTropy = "gold"
-      else if (user.prCount == 10)
+      else if (user.prCount._2 < prCount._2)
         newTropy = "silver"
-      else if (user.prCount == 5)
+      else if (user.prCount._1 < prCount._1)
         newTropy = "bronze"
+
+      user.prCount = prCount
     }
 
     val response = ujson.write(

@@ -41,9 +41,15 @@ object Github {
     implicit def reader: Reader[Repository] = macroR
   }
 
+  case class PullRequests(items: List[PullRequest])
+  object PullRequests {
+    implicit def reader: Reader[PullRequests] = macroR
+  }
+
   // https://developer.github.com/v3/pulls/
   case class PullRequest(
     number: Int,
+    repository_url: String,
     user: User
   )
   object PullRequest {

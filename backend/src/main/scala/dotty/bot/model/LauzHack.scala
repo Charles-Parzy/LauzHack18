@@ -12,13 +12,13 @@ object LauzHack {
     followedRepos: mutable.Set[String],
     topics: mutable.Set[String],
     languages: mutable.Set[String],
-    var prCount: Int
+    var prCount: (Int, Int, Int)
   ) {
 
   }
   object User {
     def apply(token: String, login: String): User =
-      new User(token, login, new mutable.HashSet, new mutable.HashSet, new mutable.HashSet, prCount = 0)
+      new User(token, login, new mutable.HashSet, new mutable.HashSet, new mutable.HashSet, prCount = (0, 0, 0))
   }
 
   case class Repository(
