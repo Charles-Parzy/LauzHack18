@@ -1,11 +1,14 @@
 package dotty.bot
 
+import cask.model.Response
 import dotty.bot.model.{Github, LauzHack}
 import dotty.bot.model.Github.{AccessToken, Repositories, Repository, UserUpdate}
-import dotty.bot.model.LauzHack.{Trophies, User}
+import dotty.bot.model.LauzHack.User
 import requests.RequestAuth
 import ujson.Js
 import upickle.default.{read, write}
+
+import scala.collection.mutable
 
 object Main extends cask.MainRoutes {
   // LauzHack Github app
@@ -33,7 +36,7 @@ object Main extends cask.MainRoutes {
   private def ghAPI(path: String) = "https://api.github.com" + path
 
   @cask.get("/generateToken")
-  def generateToken(code: String) = {
+  def generateToken(code: String): Response = {
     val response = ghSession.post(
       s"https://github.com/login/oauth/access_token?client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&code=$code",
       headers = Map("Accept" -> "application/json")
@@ -55,7 +58,7 @@ object Main extends cask.MainRoutes {
     val user = DB.getUser(token)
     val topics = user.topics.map(s => "topic:" + s).mkString("+")
     val languages = user.languages.map(s => "language:" + s).mkString("+")
-    var repos: Seq[Github.Repository] = List.empty
+    var res: Seq[Github.Repository] = List.empty
     if (!topics.isEmpty || !languages.isEmpty) {
       var query = topics
       if (!query.isEmpty) {
@@ -63,20 +66,38 @@ object Main extends cask.MainRoutes {
       } else {
         query = languages
       }
+
       val response = ghUserSession(token).get(
         ghAPI(s"/search/repositories?q=$query&sort=stars&order=desc"),
         headers = Map ("Accept" -> "application/vnd.github.mercy-preview+json"))
       if (!response.is2xx) {
         BadRequest(response.statusMessage)
       }
-      println(response.text)
-      repos = read[Repositories](response.text).items
+
+      val repos = read[Repositories](response.text).items
+      val inter = repos.map(t => t.full_name).toSet
+
+      val set = new mutable.HashSet[Github.Repository]()
+      topics.split("+").foreach(t => getRepos(token, set, t))
+      languages.split("+").foreach(t => getRepos(token, set, t))
+      res = repos ++ set.filter(r => !inter.contains(r.full_name))
     }
-    Ok(timelineToJson(token, repos))
+    Ok(timelineToJson(token, res))
+  }
+
+  private def getRepos(token: String, set: mutable.HashSet[Github.Repository], query: String): Unit = {
+    val response = ghUserSession(token).get(
+      ghAPI(s"/search/repositories?q=$query&sort=stars&order=desc"),
+      headers = Map ("Accept" -> "application/vnd.github.mercy-preview+json"))
+    if (!response.is2xx) {
+      BadRequest(response.statusMessage)
+    }
+    println(response.text)
+    set ++= read[Repositories](response.text).items
   }
 
   @cask.get("/project")
-  def project(token: String, owner: String, repo: String) = {
+  def project(token: String, owner: String, repo: String): Response = {
     val response = ghUserSession(token).get(
       ghAPI(s"/repos/$owner/$repo"),
       headers = Map ("Accept" -> "application/vnd.github.mercy-preview+json")
@@ -102,12 +123,12 @@ object Main extends cask.MainRoutes {
   }
 
   @cask.get("/")
-  def root() = {
+  def root(): String = {
     ghSession.get(ghAPI("/user")).text
   }
 
   @cask.get("/test-logged-in")
-  def loggedInTest(param: String)(user: User) = {
+  def loggedInTest(param: String)(user: User): Response = {
     Ok(s"Suce ${user.token} $param!")
   }
 
@@ -122,16 +143,16 @@ object Main extends cask.MainRoutes {
       "topics" -> user.topics,
       "languages" -> user.languages,
       "trophies" -> Js.Arr(
-        Js.Obj("count" -> user.trophies.gold, "picture" -> Trophies.GOLD_TROPHY),
-        Js.Obj("count" -> user.trophies.silver, "picture" -> Trophies.SILVER_TROPHY),
-        Js.Obj("count" -> user.trophies.bronze, "picture" -> Trophies.BRONZE_TROPHY)
+        Js.Obj("count" -> user.trophies.gold),
+        Js.Obj("count" -> user.trophies.silver),
+        Js.Obj("count" -> user.trophies.bronze)
       )
     )
     Ok(ujson.write(profile))
   }
 
   @cask.get("/follow")
-  def follow(token: String, owner: String, repo: String) = {
+  def follow(token: String, owner: String, repo: String): Response = {
     val user = DB.getUser(token)
     val fullName = s"$owner/$repo"
 
@@ -158,7 +179,7 @@ object Main extends cask.MainRoutes {
   }
 
   @cask.get("/unfollow")
-  def unfollow(token: String, owner: String, repo: String) = {
+  def unfollow(token: String, owner: String, repo: String): Response = {
     val user = DB.getUser(token)
     val fullName = s"$owner/$repo"
     user.followedRepos -= fullName
@@ -167,7 +188,7 @@ object Main extends cask.MainRoutes {
   }
 
   @cask.get("/debug")
-  def debug() = {
+  def debug(): Response = {
     Ok(DB.dump())
   }
 
@@ -183,7 +204,7 @@ object Main extends cask.MainRoutes {
   }
 
   @cask.get("/prs")
-  def mergedPRs(token: String) = {
+  def mergedPRs(token: String): Response = {
     val user = DB.getUser(token)
     val params = List(
       "type:pr",
