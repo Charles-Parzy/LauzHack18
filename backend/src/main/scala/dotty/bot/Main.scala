@@ -199,7 +199,7 @@ object Main extends cask.MainRoutes {
   }
 
   @cask.get("/notifications")
-  def notifications(token: String) = {
+  def notifications(token: String): Response = {
     val user = DB.getUser(token)
     val prCount = mergedPRs(user)
 
