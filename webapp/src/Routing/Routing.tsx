@@ -9,6 +9,7 @@ import HomePage from "../HomePage";
 import ProjectProfile from 'src/ProjectProfile/ProjectProfile';
 import TimelineStore from 'src/Timeline/TimelineStore';
 import Timeline from 'src/Timeline/Timeline';
+import UserProfile from 'src/UserProfile/UserProfile';
 
 const browserHistory = createBrowserHistory();
 const routingStore = new RouterStore();
@@ -35,6 +36,7 @@ export default class Routing extends React.Component<{}, {}> {
                         <Route exact={true} path="/" component={HomePage} />
                         <Route path="/timeline" component={Timeline} />
                         <Route path="/project" component={ProjectProfile} />
+                        <Route path="/profile" component={UserProfile} />
                     </Switch>
                 </Router>
             </Provider>

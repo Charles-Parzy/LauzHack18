@@ -12,9 +12,9 @@ import ComponentContainer from 'src/Utils/ComponentContainer';
 
 const styles = () => createStyles({
     spinnerContainer: {
-        position: "fixed", /* or absolute */
-        top: "50%",
-        left: "50%",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
     }
 });
 
