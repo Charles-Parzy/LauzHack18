@@ -2,7 +2,7 @@ package dotty.bot
 
 import dotty.bot.model.{Github, LauzHack}
 import dotty.bot.model.Github.{AccessToken, Repository, UserUpdate}
-import dotty.bot.model.LauzHack.User
+import dotty.bot.model.LauzHack.{Trophies, User}
 import requests.RequestAuth
 import ujson.Js
 import upickle.default.{read, write}
@@ -115,7 +115,12 @@ object Main extends cask.MainRoutes {
       "name" -> Js.Str(json.login),
       "picture" -> Js.Str(json.avatar_url),
       "topics" -> user.topics,
-      "languages" -> user.languages
+      "languages" -> user.languages,
+      "trophies" -> Js.Arr(
+        Js.Obj("count" -> user.trophies.gold, "picture" -> Trophies.GOLD_TROPHY),
+        Js.Obj("count" -> user.trophies.silver, "picture" -> Trophies.SILVER_TROPHY),
+        Js.Obj("count" -> user.trophies.bronze, "picture" -> Trophies.BRONZE_TROPHY)
+      )
     )
     Ok(ujson.write(profile))
   }
