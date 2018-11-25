@@ -122,7 +122,6 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
 
     private submitEditedData() {
         const { auth } = this.props;
-        this.waiting = true;
         const request = new Request(
             "http://localhost:8080/tags", 
             {
@@ -151,11 +150,16 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
 
     public render() {
         const { classes } = this.props;
+        const buttonText = this.editing ? "Save" : "Edit";
         if (this.waiting) {
             return (
-                <div className={classes.spinnerContainer}>
-                    <CircularProgress />
-                </div>
+                <ComponentContainer
+                    barTitle="User Profile"
+                >   
+                    <div className={classes.spinnerContainer}>
+                        <CircularProgress />
+                    </div>
+                </ComponentContainer>
             );
         }  
         const saveCallback = () => {
@@ -165,14 +169,13 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
         const editCallback = () => {
             this.editing = true;
         }
-        const buttonText = this.editing ? "Save" : "Edit";
         const buttonCallback = this.editing ? saveCallback : editCallback; 
 
         return (
             <ComponentContainer
                 barTitle="User Profile"
                 buttonText={buttonText}
-                buttonVariant="outlined"
+                buttonVariant="contained"
                 buttonCallback={buttonCallback}
             >   
                 <div className={classes.container}>
