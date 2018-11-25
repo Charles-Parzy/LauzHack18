@@ -37,8 +37,12 @@ export class Project {
         return this._tags;
     }
 
-    static fromJson(json: any): Project {
+    static fromJsonWithIssue(json: any): Project {
         return new Project(json.full_name, json.owner, json.name, json.url, json.description, json.topics, json.issues.map(Issue.fromJson));
+    }
+
+    static fromJson(json: any) {
+        return new Project(json.full_name, json.owner, json.name, json.url, json.description, json.topics, []);
     }
 
     get issues(): Issue[] {

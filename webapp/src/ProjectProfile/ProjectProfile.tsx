@@ -64,7 +64,7 @@ class ProjectProfile extends React.Component<ProjectProfileProps, ProjectProfile
 
         fetch(new Request(`http://localhost:8080/project?token=${auth.token}&owner=${owner}&repo=${repo}`)).then(res => res.json()).then(res => {
             console.log('Success:', res);
-            this.project = Project.fromJson(res);
+            this.project = Project.fromJsonWithIssue(res);
             this.followed = res.followed;
             this.waiting = false;
 
