@@ -28,7 +28,15 @@ export default class AuthenticationStore {
         });
     }
 
-    private handleNotification(res: NotificationRes): any {
+    private handleNotification(res: NotificationRes): void {
         console.log(res);
+        if (!res.prMerged && res.newTrophy == "none") {
+            return;
+        }
+        this.notif = res;
     }
+
+    @observable private _notif: NotificationRes | undefined;
+    @computed get notif(): NotificationRes | undefined { return this._notif; }
+    set notif(notif: NotificationRes | undefined) { this._notif = notif; }
 }

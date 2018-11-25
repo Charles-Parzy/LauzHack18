@@ -74,6 +74,7 @@ class ProjectProfile extends React.Component<ProjectProfileProps, ProjectProfile
     }
 
     public render() {
+        const { auth } = this.props;
         const {followed, project, waiting} = this;
 
         if (waiting) {
@@ -86,6 +87,7 @@ class ProjectProfile extends React.Component<ProjectProfileProps, ProjectProfile
 
         return (
             <ComponentContainer
+                auth={auth}
                 barTitle="Repository"
                 back={true}
                 routing={this.props.routing}

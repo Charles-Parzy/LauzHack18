@@ -53,7 +53,7 @@ class Timeline extends React.Component<TimelineProps, {}> {
     }
     
     public render() {
-        const { classes, timeline, routing } = this.props;
+        const { auth, classes, timeline, routing } = this.props;
         const { followedProjects, recommendedProjects } = timeline;
         if (timeline.waiting) {
             return (
@@ -63,7 +63,7 @@ class Timeline extends React.Component<TimelineProps, {}> {
             );
         }
         return (
-            <ComponentContainer barTitle="Timeline" back={false} routing={routing} buttonText="Profile" buttonVariant="contained" buttonCallback={() => routing.push("profile")}>
+            <ComponentContainer auth={auth} barTitle="Timeline" back={false} routing={routing} buttonText="Profile" buttonVariant="contained" buttonCallback={() => routing.push("profile")}>
                 {followedProjects.length != 0 && (<div>
                     <Typography variant="h4">Followed Projects</Typography>
                     <ProjectList projects={followedProjects} routing={routing} />

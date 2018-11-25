@@ -5,6 +5,8 @@ import IconButton from "@material-ui/core/IconButton/IconButton";
 import {RouterStore} from "mobx-react-router";
 import Snackbar from "@material-ui/core/Snackbar/Snackbar";
 import Fade from "@material-ui/core/Fade/Fade";
+import { observer } from 'mobx-react';
+import AuthenticationStore from 'src/Authentication/AuthenticationStore';
 
 
 const styles = () => createStyles({
@@ -30,14 +32,28 @@ interface ComponentContainerProps extends WithStyles<typeof styles> {
     buttonVariant?: 'text' | 'flat' | 'outlined' | 'contained' | 'raised' | 'fab' | 'extendedFab';
     children: any;
     routing: RouterStore;
+    auth: AuthenticationStore;
 }
 
+@observer
 class ComponentContainer extends React.Component<ComponentContainerProps, {}> {
     public render() {
-        window.setInterval(() => this.showSnackbar(), 10000);
-
-        const {barTitle, buttonText, buttonCallback, buttonVariant, children, classes, back, routing} = this.props;
+        const {auth, barTitle, buttonText, buttonCallback, buttonVariant, children, classes, back, routing} = this.props;
         const displayButton: boolean = !!buttonCallback && !!buttonText;
+        let notifMsg: string = "";
+        if (!!auth.notif) {
+            if (auth.notif.prMerged) {
+                notifMsg += "A new PR has been merged! ";
+            } 
+            if (auth.notif.newTrophy != "none") {
+                notifMsg += `You got a new ${auth.notif.newTrophy} trophy!`;
+            }
+        }
+        const action = (
+            <Button color="secondary" size="small" onClick={() => auth.notif = undefined}>
+              Close
+            </Button>
+          );
         return (
             <div>
                 <AppBar position="fixed" color="default">
@@ -58,29 +74,18 @@ class ComponentContainer extends React.Component<ComponentContainerProps, {}> {
                 </div>
                 <div>
                     <Snackbar
-                        open={this.state.open}
-                        onClose={this.handleClose}
+                        open={!!auth.notif}
+                        onClose={() => auth.notif = undefined}
                         TransitionComponent={Fade}
                         ContentProps={{
                             'aria-describedby': 'message-id',
                         }}
-                        message={<span id="message-id">I love snacks</span>}
+                        message={<span id="message-id">{notifMsg}</span>}
+                        action={action}
                     />
                 </div>
             </div>
         );
-    }
-
-    state = {
-        open: false,
-    };
-
-    handleClose = () => {
-        this.setState({ open: false });
-    };
-
-    showSnackbar() {
-        this.setState({ open: true });
     }
 }
 

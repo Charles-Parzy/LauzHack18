@@ -209,11 +209,12 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
     }
 
     public render() {
-        const {classes} = this.props;
+        const {auth, classes} = this.props;
         const buttonText = this.editing ? "Save" : "Edit";
         if (this.waiting) {
             return (
                 <ComponentContainer
+                    auth={auth}
                     barTitle="User Profile"
                     back={true}
                     routing={this.props.routing}
@@ -235,6 +236,7 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
 
         return (
             <ComponentContainer
+                auth={auth}
                 barTitle="User Profile"
                 back={true}
                 buttonText={buttonText}
