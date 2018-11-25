@@ -61,7 +61,7 @@ class Timeline extends React.Component<TimelineProps, {}> {
             );
         }
         return (
-            <ComponentContainer barTitle="Timeline">
+            <ComponentContainer barTitle="Timeline" back={false} routing={routing} buttonText="Profile" buttonVariant="contained" buttonCallback={() => routing.push("profile")}>
                 {followedProjects.length != 0 && (<div>
                     <Typography variant="h4">Followed Projects</Typography>
                     <ProjectList projects={followedProjects} routing={routing} />

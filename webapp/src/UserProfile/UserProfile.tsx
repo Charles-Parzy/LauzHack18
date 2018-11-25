@@ -6,6 +6,7 @@ import User from './User';
 import { observable, computed } from 'mobx';
 import AuthenticationStore from 'src/Authentication/AuthenticationStore';
 import { observer, inject } from 'mobx-react';
+import {RouterStore} from "mobx-react-router";
 
 const styles = (theme: Theme) => createStyles({
     container: {
@@ -66,9 +67,10 @@ const styles = (theme: Theme) => createStyles({
 
 interface UserProfileProps extends WithStyles<typeof styles> {
     auth: AuthenticationStore;
+    routing: RouterStore;
 }
 
-@inject("auth") @observer
+@inject("auth", "routing") @observer
 class UserProfile extends React.Component<UserProfileProps, {}> {
     @observable private _user: User;
     @computed get user(): User { return this._user; }
@@ -155,6 +157,8 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
             return (
                 <ComponentContainer
                     barTitle="User Profile"
+                    back={true}
+                    routing={this.props.routing}
                 >   
                     <div className={classes.spinnerContainer}>
                         <CircularProgress />
@@ -174,9 +178,11 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
         return (
             <ComponentContainer
                 barTitle="User Profile"
+                back={true}
                 buttonText={buttonText}
                 buttonVariant="contained"
                 buttonCallback={buttonCallback}
+                routing={this.props.routing}
             >   
                 <div className={classes.container}>
                     <div className={classes.avatarContainer}>

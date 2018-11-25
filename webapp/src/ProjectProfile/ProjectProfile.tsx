@@ -87,6 +87,8 @@ class ProjectProfile extends React.Component<ProjectProfileProps, ProjectProfile
         return (
             <ComponentContainer
                 barTitle="Repository"
+                back={true}
+                routing={this.props.routing}
                 buttonCallback={() => this.updateFollow()}
                 buttonText={followed ? "Unfollow" : "Follow"}
                 buttonVariant={followed ? "outlined" : "contained"}
