@@ -136,17 +136,19 @@ object Main extends cask.MainRoutes {
   def profile(token: String): cask.Response = {
     val user = DB.getUser(token)
     val response = ghUserSession(token).get(ghAPI("/user"))
-    val json = read[Github.User](response.text)
+    val ghUser = read[Github.User](response.text)
+    val trophyCount =
+      if (user.prCount >= 20) 3
+      else if (user.prCount >= 10) 2
+      else if (user.prCount >= 5) 1
+      else 0
     val profile = Js.Obj(
-      "name" -> Js.Str(json.login),
-      "picture" -> Js.Str(json.avatar_url),
+      "name" -> Js.Str(ghUser.login),
+      "picture" -> Js.Str(ghUser.avatar_url),
       "topics" -> user.topics,
       "languages" -> user.languages,
-      "trophies" -> Js.Arr(
-        Js.Obj("count" -> user.trophies.gold),
-        Js.Obj("count" -> user.trophies.silver),
-        Js.Obj("count" -> user.trophies.bronze)
-      )
+      "trophies" -> Js.Num(trophyCount),
+      "pr-merged" -> Js.Num(user.prCount)
     )
     Ok(ujson.write(profile))
   }
@@ -203,18 +205,45 @@ object Main extends cask.MainRoutes {
     user.topics ++= updatedUser.topics
   }
 
-  @cask.get("/prs")
-  def mergedPRs(token: String): Response = {
-    val user = DB.getUser(token)
+
+  private def mergedPRs(user: User): Int = {
     val params = List(
       "type:pr",
       s"author:${user.login}",
       "is:merged"
     )
     val query = params.mkString("+")
-    val response = ghUserSession(token).get(ghAPI("/search/issues?q=" + query))
+    val response = ghUserSession(user.token).get(ghAPI("/search/issues?q=" + query))
     val count = ujson.read(response.text).obj("total_count").num.toInt
-    Ok(count.toString)
+    count
+  }
+
+  @cask.get("/notifications")
+  def notifications(token: String) = {
+    val user = DB.getUser(token)
+    val prCount = mergedPRs(user)
+
+    var newPR = false
+    var newTropy = "none"
+
+    if (prCount > user.prCount) {
+      user.prCount = prCount
+      newPR = true
+      if (user.prCount == 20)
+        newTropy = "gold"
+      else if (user.prCount == 10)
+        newTropy = "silver"
+      else if (user.prCount == 5)
+        newTropy = "bronze"
+    }
+
+    val response = ujson.write(
+      Js.Obj(
+        "pr_merged"  -> newPR,
+        "new_trophy" -> newTropy
+      )
+    )
+    Ok(response)
   }
 
 

@@ -12,20 +12,13 @@ object LauzHack {
     followedRepos: mutable.Set[String],
     topics: mutable.Set[String],
     languages: mutable.Set[String],
-    trophies: Trophies
-  )
+    var prCount: Int
+  ) {
+
+  }
   object User {
     def apply(token: String, login: String): User =
-      new User(token, login, new mutable.HashSet, new mutable.HashSet, new mutable.HashSet, Trophies())
-  }
-
-  case class Trophies(
-    gold: Int,
-    silver: Int,
-    bronze: Int
-  )
-  object Trophies {
-    def apply(): Trophies = new Trophies(0,0,0)
+      new User(token, login, new mutable.HashSet, new mutable.HashSet, new mutable.HashSet, prCount = 0)
   }
 
   case class Repository(
