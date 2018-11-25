@@ -18,9 +18,9 @@ object Main extends cask.MainRoutes {
 
   override def debugMode: Boolean = true
 
-  val ghSession = requests.Session(
-    auth = new RequestAuth.Basic(GITHUB_USER, GITHUB_TKN)
-  )
+  // val ghSession = requests.Session(
+  //   auth = new RequestAuth.Basic(GITHUB_USER, GITHUB_TKN)
+  // )
 
   class OAuth2(token: String) extends RequestAuth {
     def header = Some(s"token $token")
@@ -35,7 +35,7 @@ object Main extends cask.MainRoutes {
 
   @cask.get("/generateToken")
   def generateToken(code: String): Response = {
-    val response = ghSession.post(
+    val response = requests.post(
       s"https://github.com/login/oauth/access_token?client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&code=$code",
       headers = Map("Accept" -> "application/json")
     )
@@ -102,10 +102,10 @@ object Main extends cask.MainRoutes {
     }
   }
 
-  @cask.get("/")
-  def root(): String = {
-    ghSession.get(ghAPI("/user")).text
-  }
+  // @cask.get("/")
+  // def root(): String = {
+  //   ghSession.get(ghAPI("/user")).text
+  // }
 
   @cask.get("/test-logged-in")
   def loggedInTest(param: String)(user: User): Response = {
