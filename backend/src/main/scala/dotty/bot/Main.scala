@@ -1,8 +1,8 @@
 package dotty.bot
 
 import dotty.bot.model.{Github, LauzHack}
-import dotty.bot.model.Github.{AccessToken, Repository, UserUpdate}
-import dotty.bot.model.LauzHack.User
+import dotty.bot.model.Github.{AccessToken, Repositories, Repository, UserUpdate}
+import dotty.bot.model.LauzHack.{Trophies, User}
 import requests.RequestAuth
 import ujson.Js
 import upickle.default.{read, write}
@@ -55,7 +55,7 @@ object Main extends cask.MainRoutes {
     val user = DB.getUser(token)
     val topics = user.topics.map(s => "topic:" + s).mkString("+")
     val languages = user.languages.map(s => "language:" + s).mkString("+")
-    var repos: List[Github.Repository] = List.empty
+    var repos: Seq[Github.Repository] = List.empty
     if (!topics.isEmpty && !languages.isEmpty) {
       var query = topics
       if (!query.isEmpty) {
@@ -69,9 +69,10 @@ object Main extends cask.MainRoutes {
       if (!response.is2xx) {
         BadRequest(response.statusMessage)
       }
-      repos = read[List[Repository]](response.text)
+      println(response.text)
+      repos = read[Repositories](response.text).items
     }
-    Ok(timelineToJson(repos))
+    Ok(timelineToJson(token, repos))
   }
 
   @cask.get("/project")
@@ -116,34 +117,14 @@ object Main extends cask.MainRoutes {
       "name" -> Js.Str(json.login),
       "picture" -> Js.Str(json.avatar_url),
       "topics" -> user.topics,
-      "languages" -> user.languages
-    )
-    Ok(ujson.write(profile))
-  }
-
-  private def getIssues(token: String, owner: String, repo: String) = {
-    val response = ghUserSession(token).get(
-      ghAPI(s"/repos/$owner/$repo/issues"),
-      params = Map(
-        "labels" -> "help wanted"
+      "languages" -> user.languages,
+      "trophies" -> Js.Arr(
+        Js.Obj("count" -> user.trophies.gold, "picture" -> Trophies.GOLD_TROPHY),
+        Js.Obj("count" -> user.trophies.silver, "picture" -> Trophies.SILVER_TROPHY),
+        Js.Obj("count" -> user.trophies.bronze, "picture" -> Trophies.BRONZE_TROPHY)
       )
     )
-
-    if (response.is2xx) {
-      val issues = read[List[Github.Issue]](response.text)
-      val cleaned = issues.map { i =>
-        Js.Obj(
-          "number" -> Js.Num(i.number),
-          "title" -> Js.Str(i.title),
-          "url" -> Js.Str(i.html_url),
-          "created" -> Js.Str(i.created_at),
-          "user" -> Js.Str(i.user.login)
-        )
-      }
-      cleaned
-    }
-    else
-      List.empty
+    Ok(ujson.write(profile))
   }
 
   @cask.get("/follow")
@@ -152,7 +133,9 @@ object Main extends cask.MainRoutes {
     val fullName = s"$owner/$repo"
 
     // Adding repo to cache
-    val ghRepo = read[Repository](ghUserSession(token).get(ghAPI(s"/repos/$owner/$repo")).text)
+    val response = ghUserSession(token).get(ghAPI(s"/repos/$owner/$repo")).text
+    println(response)
+    val ghRepo = read[Repository](response)
     val lhRepo = LauzHack.Repository(
       name = repo,
       owner = owner,
@@ -210,18 +193,58 @@ object Main extends cask.MainRoutes {
     Ok(count.toString)
   }
 
-  private def timelineToJson(repos: List[Repository]): String = {
-    val recommendedRepo = repos.map(i => {
+
+  private def getIssues(token: String, owner: String, repo: String) = {
+    val response = ghUserSession(token).get(
+      ghAPI(s"/repos/$owner/$repo/issues"),
+      params = Map(
+        "labels" -> "help wanted"
+      )
+    )
+
+    if (response.is2xx) {
+      val issues = read[List[Github.Issue]](response.text)
+      val cleaned = issues.map { i =>
         Js.Obj(
-          "full_name"  -> Js.Str(i.full_name),
-          "name"   -> Js.Str(i.name),
-          "description" -> Js.Str(i.description),
-          "owner" -> Js.Str(i.owner.login)
+          "number" -> Js.Num(i.number),
+          "title" -> Js.Str(i.title),
+          "url" -> Js.Str(i.html_url),
+          "created" -> Js.Str(i.created_at),
+          "user" -> Js.Str(i.user.login)
         )
+      }
+      cleaned
+    }
+    else
+      List.empty
+  }
+
+  private def timelineToJson(token: String, repos: Seq[Repository]): String = {
+    val recommendedRepo = repos.map(i => LauzHack.Repository(i.name, i.owner.login, i.full_name, i.description, i.html_url, i.topics))
+    val user = DB.getUser(token)
+    val followed = user.followedRepos.map(r => DB.repositories(r))
+    val set = followed.map(i => i.full_name).toSet
+    val recommended = recommendedRepo.filter(p => !set.contains(p.full_name))
+    val jsonRecommended = recommended.map(i => {
+      Js.Obj(
+        "full_name" -> Js.Str(i.full_name),
+        "name" -> Js.Str(i.name),
+        "description" -> Js.Str(i.description),
+        "owner" -> Js.Str(i.owner)
+      )
     })
+    val jsonFollowed = followed.map(rep => {
+      Js.Obj(
+        "full_name"  -> Js.Str(rep.full_name),
+        "name"   -> Js.Str(rep.name),
+        "description" -> Js.Str(rep.description),
+        "owner" -> Js.Str(rep.owner)
+      )
+    })
+
     val res = Js.Obj(
-      "recommended_projects" -> recommendedRepo,
-      "followed_projects" -> Js.Arr()
+      "recommended_projects" -> jsonRecommended,
+      "followed_projects" -> jsonFollowed
     )
     ujson.write(res)
   }

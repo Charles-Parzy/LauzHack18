@@ -9,12 +9,13 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import { Project } from 'src/GithubProject';
 import { createStyles, WithStyles, withStyles } from '@material-ui/core';
 import ComponentContainer from 'src/Utils/ComponentContainer';
+import Typography from "@material-ui/core/es/Typography/Typography";
 
 const styles = () => createStyles({
     spinnerContainer: {
-        position: "fixed", /* or absolute */
-        top: "50%",
-        left: "50%",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
     }
 });
 
@@ -39,8 +40,8 @@ class Timeline extends React.Component<TimelineProps, {}> {
         fetch(request).then(res => res.json())
         .then(res => {
             console.log('Success:', JSON.stringify(res));
-            timeline.followedProjects = res.followed_projects.map((p: any) => new Project(p.full_name, p.owner, p.name, p.description, [], [], false));
-            timeline.recommendedProjects = res.recommended_projects.map((p: any) => new Project(p.full_name, p.owner, p.name, p.description, [], [], false));
+            timeline.followedProjects = res.followed_projects.map(Project.fromJson);
+            timeline.recommendedProjects = res.recommended_projects.map(Project.fromJson);
             timeline.waiting = false;
         })
         .catch(err => {
@@ -60,16 +61,20 @@ class Timeline extends React.Component<TimelineProps, {}> {
             );
         }
         return (
-            <ComponentContainer barTitle="Timeline">
-                <div>
-                    <h1>Followed Projects</h1>
+            <ComponentContainer barTitle="Timeline" back={false} routing={routing} buttonText="Profile" buttonVariant="contained" buttonCallback={() => routing.push("profile")}>
+                {followedProjects.length != 0 && (<div>
+                    <Typography variant="h4">Followed Projects</Typography>
                     <ProjectList projects={followedProjects} routing={routing} />
-                </div>
+                </div>)}
 
-                <div>
-                    <h1>Recommended Projects</h1>
+                {recommendedProjects.length != 0 && (<div>
+                    <Typography variant="h4">Recommended Projects</Typography>
                     <ProjectList projects={recommendedProjects} routing={routing} />
-                </div>
+                </div>)}
+
+                {recommendedProjects.length == 0 && followedProjects.length == 0  && (
+                    <Typography variant="h5">Update your profile to get project recommendations.</Typography>
+                )}
 
             </ComponentContainer>
         );

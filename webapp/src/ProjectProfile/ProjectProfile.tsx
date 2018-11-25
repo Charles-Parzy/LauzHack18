@@ -12,19 +12,24 @@ import ComponentContainer from 'src/Utils/ComponentContainer';
 import AuthenticationStore from "../Authentication/AuthenticationStore";
 import {inject, observer} from "mobx-react";
 import {computed, observable} from "mobx";
+import {RouterStore} from "mobx-react-router";
+import CircularProgress from "@material-ui/core/CircularProgress/CircularProgress";
 
 interface ProjectProfileState {
 }
 
 interface ProjectProfileProps {
     auth: AuthenticationStore;
+    routing: RouterStore;
 }
 
-@inject("auth") @observer
+@inject("auth", "routing") @observer
 class ProjectProfile extends React.Component<ProjectProfileProps, ProjectProfileState> {
 
     @observable private _project: Project;
     @observable private _followed: boolean;
+    @observable private _waiting: boolean = false;
+
 
     @computed get project() {
         return this._project;
@@ -34,7 +39,7 @@ class ProjectProfile extends React.Component<ProjectProfileProps, ProjectProfile
         this._project = project;
     }
 
-    @computed get follow() {
+    @computed get followed() {
         return this._followed;
     }
 
@@ -42,36 +47,55 @@ class ProjectProfile extends React.Component<ProjectProfileProps, ProjectProfile
         this._followed = followed;
     }
 
+    @computed get waiting(): boolean {
+        return this._waiting;
+    }
+
+    set waiting(waiting: boolean) {
+        this._waiting = waiting;
+    }
+
     componentWillMount(): void {
-        this.project = new Project(
-            "dotty-id",
-            "lampepfl",
-            "dotty",
-            "Research compiler that will become Scala 3 ",
-            ["scala", "scala3", "epfl", "language-server-protocol", "compiler"],
-            [new Issue("2543", "Require `case` prefix for patterns in for-comprehension generators", "#871263 opened 3 days ago"),
-                new Issue("2543", "Require `case` prefix for patterns in for-comprehension generators", "#871263 opened 3 days ago"),
-                new Issue("2543", "Require `case` prefix for patterns in for-comprehension generators", "#871263 opened 3 days ago"),
-                new Issue("2543", "Require `case` prefix for patterns in for-comprehension generators", "#871263 opened 3 days ago"),
-                new Issue("2543", "Require `case` prefix for patterns in for-comprehension generators", "#871263 opened 3 days ago")
-            ],
-            false);
+        const {auth, routing} = this.props;
+        const {location} = routing;
+        const params = new URLSearchParams(location.search);
+        const owner = params.get('owner');
+        const repo = params.get('repo');
+
+        fetch(new Request(`http://localhost:8080/project?token=${auth.token}&owner=${owner}&repo=${repo}`)).then(res => res.json()).then(res => {
+            console.log('Success:', res);
+            this.project = Project.fromJsonWithIssue(res);
+            this.followed = res.followed;
+            this.waiting = false;
+
+        }).catch(reason => console.log(reason));
+
+        this.waiting = true;
     }
 
     public render() {
-        const {project} = this;
-        const follow: boolean = project.followed;
+        const {followed, project, waiting} = this;
+
+        if (waiting) {
+            return (
+                <div className="spinnerContainer">
+                    <CircularProgress/>
+                </div>
+            );
+        }
 
         return (
             <ComponentContainer
                 barTitle="Repository"
-                buttonCallback={() => this.updateFollow(!project.followed)}
-                buttonText={project.printFollow()}
-                buttonVariant={follow ? "outlined" : "contained"}
+                back={true}
+                routing={this.props.routing}
+                buttonCallback={() => this.updateFollow()}
+                buttonText={followed ? "Unfollow" : "Follow"}
+                buttonVariant={followed ? "outlined" : "contained"}
             >
                 <div className="information">
                     <div className="title">
-                        <Typography variant="h2">{project.getTitle()}</Typography>
+                        <Typography variant="h2">{project.fullname}</Typography>
                     </div>
                     <div className="details">
                         <Typography variant="h6">
@@ -95,14 +119,14 @@ class ProjectProfile extends React.Component<ProjectProfileProps, ProjectProfile
         );
     }
 
-    private updateFollow(followed: boolean): void {
-        const {project} = this;
-        let url: string = `http://localhost:8080/${followed ? "unfollow" : "follow"}?token=${this.props.auth.token}&owner=${project.user}&repo=${project.name}`;
+    private updateFollow(): void {
+        const {followed, project} = this;
+        console.log(followed);
+        let url: string = `http://localhost:8080/${followed ? "unfollow" : "follow"}?token=${this.props.auth.token}&owner=${project.owner}&repo=${project.repo}`;
         const request = new Request(url);
         fetch(request).then(res => res.json())
             .then(unused => {
-                project.follow = !followed;
-                this.setState(this.state);
+                this.followed = !followed;
             })
             .catch(err => console.error("Error:", err));
     }
@@ -125,8 +149,8 @@ class ProjectProfile extends React.Component<ProjectProfileProps, ProjectProfile
             <List>
                 {project.issues.map(function (issue: Issue, index: number) {
                     return <ListItem key={index} button component="a"
-                                     href={issue.url(project.user, project.name)}><ListItemText primary={issue.title}
-                                                                                                secondary={issue.subtext}/></ListItem>;
+                                     href={issue.url}><ListItemText primary={issue.title}
+                                                                    secondary={issue.subtext}/></ListItem>;
                 })}
             </List>
         )

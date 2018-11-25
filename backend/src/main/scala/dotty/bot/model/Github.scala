@@ -23,6 +23,11 @@ object Github {
     implicit def rw: ReadWriter[User] = macroRW
   }
 
+  case class Repositories(items: Seq[Repository] = Nil)
+  object Repositories {
+    implicit def reader: Reader[Repositories] = macroR
+  }
+
   // https://developer.github.com/v3/repos/
   case class Repository(
     name: String,
