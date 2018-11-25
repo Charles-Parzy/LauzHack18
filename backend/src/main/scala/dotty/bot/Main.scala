@@ -151,7 +151,9 @@ object Main extends cask.MainRoutes {
     val fullName = s"$owner/$repo"
 
     // Adding repo to cache
-    val ghRepo = read[Repository](ghUserSession(token).get(ghAPI(s"/repos/$owner/$repo")).text)
+    val response = ghUserSession(token).get(ghAPI(s"/repos/$owner/$repo")).text
+    println(response)
+    val ghRepo = read[Repository](response)
     val lhRepo = LauzHack.Repository(
       name = repo,
       owner = owner,

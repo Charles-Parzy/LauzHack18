@@ -45,8 +45,8 @@ export class Project {
         this._followed = value;
     }
 
-    printFollow(): string {
-        return this._followed ? "Unfollow" : "Follow";
+    static fromJson(json: any): Project {
+        return new Project(json.full_name, json.owner, json.repo, json.description, json.topics, json.issues.map(Issue.fromJson), json.followed);
     }
 
     getTitle() {
@@ -74,6 +74,10 @@ export class Issue {
         this._id = id;
         this._title = title;
         this._subtext = subtext;
+    }
+
+    static fromJson(json: any): Issue {
+        return new Issue(json.number, json.title, "secondary");
     }
 
     get id(): string {
