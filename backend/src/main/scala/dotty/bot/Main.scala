@@ -204,17 +204,20 @@ object Main extends cask.MainRoutes {
   }
 
   private def timelineToJson(token: String, repos: Seq[Repository]): String = {
-    val recommendedRepo = repos.map(i => {
-        Js.Obj(
-          "full_name"  -> Js.Str(i.full_name),
-          "name"   -> Js.Str(i.name),
-          "description" -> Js.Str(i.description),
-          "owner" -> Js.Str(i.owner.login)
-        )
-    })
+    val recommendedRepo = repos.map(i => LauzHack.Repository(i.name, i.owner.login, i.full_name, i.description, i.html_url, i.topics))
     val user = DB.getUser(token)
-    val followed = user.followedRepos.map(r => {
-      val rep = DB.repositories(r)
+    val followed = user.followedRepos.map(r => DB.repositories(r))
+    val set = followed.map(i => i.full_name).toSet
+    val recommended = recommendedRepo.filter(p => set.contains(p.full_name))
+    val jsonRecommended = recommended.map(i => {
+      Js.Obj(
+        "full_name" -> Js.Str(i.full_name),
+        "name" -> Js.Str(i.name),
+        "description" -> Js.Str(i.description),
+        "owner" -> Js.Str(i.owner)
+      )
+    })
+    val jsonFollowed = followed.map(rep => {
       Js.Obj(
         "full_name"  -> Js.Str(rep.full_name),
         "name"   -> Js.Str(rep.name),
@@ -222,9 +225,10 @@ object Main extends cask.MainRoutes {
         "owner" -> Js.Str(rep.owner)
       )
     })
+
     val res = Js.Obj(
-      "recommended_projects" -> recommendedRepo,
-      "followed_projects" -> followed
+      "recommended_projects" -> jsonRecommended,
+      "followed_projects" -> jsonFollowed
     )
     ujson.write(res)
   }
