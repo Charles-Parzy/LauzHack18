@@ -3,6 +3,8 @@ import {AppBar, Toolbar, Typography, Button, createStyles, WithStyles, withStyle
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import IconButton from "@material-ui/core/IconButton/IconButton";
 import {RouterStore} from "mobx-react-router";
+import Snackbar from "@material-ui/core/Snackbar/Snackbar";
+import Fade from "@material-ui/core/Fade/Fade";
 
 
 const styles = () => createStyles({
@@ -32,6 +34,8 @@ interface ComponentContainerProps extends WithStyles<typeof styles> {
 
 class ComponentContainer extends React.Component<ComponentContainerProps, {}> {
     public render() {
+        window.setInterval(() => this.showSnackbar(), 10000);
+
         const {barTitle, buttonText, buttonCallback, buttonVariant, children, classes, back, routing} = this.props;
         const displayButton: boolean = !!buttonCallback && !!buttonText;
         return (
@@ -52,8 +56,31 @@ class ComponentContainer extends React.Component<ComponentContainerProps, {}> {
                 <div className={classes.childrenContainer}>
                     {children}
                 </div>
+                <div>
+                    <Snackbar
+                        open={this.state.open}
+                        onClose={this.handleClose}
+                        TransitionComponent={Fade}
+                        ContentProps={{
+                            'aria-describedby': 'message-id',
+                        }}
+                        message={<span id="message-id">I love snacks</span>}
+                    />
+                </div>
             </div>
         );
+    }
+
+    state = {
+        open: false,
+    };
+
+    handleClose = () => {
+        this.setState({ open: false });
+    };
+
+    showSnackbar() {
+        this.setState({ open: true });
     }
 }
 
