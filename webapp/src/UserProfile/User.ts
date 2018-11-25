@@ -10,6 +10,7 @@ export default class User {
         this._avatarUrl = avatarUrl;
         this._topics = topics;
         this._languages = languages;
+        this._trophies = trophies;
     }
 
     public get name(): string { return this._name; }
