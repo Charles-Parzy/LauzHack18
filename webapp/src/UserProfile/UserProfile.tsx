@@ -18,6 +18,7 @@ import AuthenticationStore from 'src/Authentication/AuthenticationStore';
 import {observer, inject} from 'mobx-react';
 import {RouterStore} from "mobx-react-router";
 import TrophiesBadge from './TrophiesBadge';
+import { Typography } from '@material-ui/core/es';
 
 const styles = (theme: Theme) => createStyles({
     container: {
@@ -146,6 +147,10 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
         this._languageBeingAdded = languageBeingAdded;
     }
 
+    @observable private _error: string = "";
+    @computed get error(): string { return this._error; }
+    set error(error: string) { this._error = error; }
+
     public componentWillMount() {
         this.loadData();
     }
@@ -157,13 +162,14 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
         fetch(request).then(res => res.json())
             .then(res => {
                 console.log('Success:', JSON.stringify(res));
-                this.user = new User(res.name, res.picture, res.topics, res.languages, res.trophies.map((t:any) => t.count));
+                this.user = new User(res.name, res.picture, res.topics, res.languages, [0, 0, 0]);
                 this.topics = this.user.topics;
                 this.languages = this.user.languages;
                 this.waiting = false;
             })
             .catch(err => {
                 console.error("Error:", err);
+                this.error = "An error happened";
                 this.waiting = false;
             });
     }
@@ -225,6 +231,22 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
                 </ComponentContainer>
             );
         }
+
+        if (!!this.error) {
+            return (
+                <ComponentContainer
+                    auth={auth}
+                    barTitle="User Profile"
+                    back={true}
+                    routing={this.props.routing}
+                >
+                    <Typography variant="h6">
+                        {this.error}
+                    </Typography>
+                </ComponentContainer>
+            )
+        }
+
         const saveCallback = () => {
             this.submitEditedData();
             this.editing = false;
@@ -249,15 +271,17 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
                         <Avatar aria-label="Profile" className={classes.avatar} src={this.user.avatarUrl}>
                         </Avatar>
                         <div style={{marginLeft: 20}}>
-                        <h1 style={{fontSize: "xx-large"}}>
+                        <Typography variant="h1" style={{fontSize: "xx-large"}}>
                             {this.user.name}
-                        </h1>
-                            <TrophiesBadge trophies={this.user.trophies}/>
+                        </Typography>
+                        <div style={{ marginTop: 20 }}/>
+                        <TrophiesBadge trophies={this.user.trophies}/>
                         </div>
                     </div>
-                    <h2>
+                    <div style={{ marginTop: 40 }}/>
+                    <Typography variant="h2">
                         Topics
-                    </h2>
+                    </Typography>
                     <div style={{display: "flex"}}>
                         {
                             this.topics.map((t, i) => {
@@ -270,7 +294,7 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
                         }
                     </div>
                     {
-                        !this.topics.length && !this.editing && "Please choose some topics you are interested in"
+                        !this.topics.length && !this.editing && <Typography>Please choose some topics you are interested in</Typography>
                     }
                     {
                         this.editing && (
@@ -289,9 +313,10 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
                             </div>
                         )
                     }
-                    <h2>
+                    <div style={{ marginTop: 30 }}/>
+                    <Typography variant="h2">
                         Languages
-                    </h2>
+                    </Typography>
                     <div style={{display: "flex"}}>
                         {
                             this.languages.map((l, i) => {
@@ -304,7 +329,7 @@ class UserProfile extends React.Component<UserProfileProps, {}> {
                         }
                     </div>
                     {
-                        !this.languages.length && !this.editing && "Please choose some programming languages you want to code"
+                        !this.languages.length && !this.editing && <Typography>Please choose some programming languages you want to code</Typography>
                     }
                     {
                         this.editing && (
